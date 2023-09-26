@@ -28,70 +28,14 @@
     name: podman
     state: present
 
-# - name: Start and enable podman service
-#   service:
-#     name: podman.socket
-#     state: started
-#     enabled: yes
+- name: Install podman-compose
+  ansible.builtin.pip:
+    name: podman-compose
+
+
 - name: Start and enable the podman service
   ansible.builtin.systemd:
     state: started
     enabled: true
     name: podman.socket
 
-- name: Install podman-compose
-  ansible.builtin.pip:
-    name: podman-compose
-
-- name: Link docker.sock to the podman.sock
-  ansible.builtin.file:
-    src: /run/podman/podman.sock
-    dest: /var/run/docker.sock
-    owner: root
-    group: root
-    state: link
-
-# I'm dropping docker compose and I'll be using podman-compose instead
-- name: Get host architecture
-  shell: uname -a | awk '{ print $13 }'
-  register: host_architecture
-
-- name: Display host architecture
-  debug:
-    var: host_architecture.stdout
-
-- name: Get url of the lastest docker-compose release
-  shell: curl 'https://api.github.com/repos/docker/compose/releases/latest' | jq -r '.assets[] | select(.name=="docker-compose-linux-{{ host_architecture.stdout }}").browser_download_url'
-  register: browser_download_url
-
-- name: Get the version of the latest docker-compose release
-  shell: echo "{{ browser_download_url.stdout }}" | awk -F '/' '{ print $(NF-1) }' | tr -d v
-  register: latest_version
-
-- name: Display latest release version
-  debug:
-    var: latest_version.stdout
-
-- name: Get the version of docker-compose on the host
-  shell: "{{ compose_dir }}/docker-compose version 2>/dev/null | awk -F' ' '{print $4 }'"
-  register: host_version
-  ignore_errors: true
-
-- name: Register if docker-compose isn't installed.
-  set_fact:
-    host_version:
-      stdout: "{{ (host_version is succeeded) | ternary(host_version.stdout, 'Docker-compose is not installed yet.') }}"
-      succeeded: "{{ host_version is succeeded }}"
-
-- name: Display host version
-  debug:
-    var: host_version.stdout
-
-- name: Download the docker-compose binary
-  ansible.builtin.get_url:
-    url: "{{ browser_download_url.stdout }}"
-    dest: "{{ compose_dir }}/docker-compose"
-    owner: root
-    group: root
-    mode: 0755
-  when: host_version.stdout != latest_version.stdout
