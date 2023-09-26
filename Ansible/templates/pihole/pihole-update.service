@@ -1,0 +1,12 @@
+[Unit]
+Description=Update Pi-hole and gravity
+Requires=pihole-FTL.service
+After=pihole-FTL.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/pihole updatePihole
+ExecStart=/usr/local/bin/pihole updateGravity
+
+[Install]
+WantedBy=multi-user.target

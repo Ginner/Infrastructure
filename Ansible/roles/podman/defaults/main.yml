@@ -1,0 +1,3 @@
+---
+container_dir: "/etc/containers"
+compose_dir: "/opt/compose"

@@ -1,0 +1,34 @@
+[lcars]
+LCARS02 ansible_host=192.168.1.140
+
+[utility]
+ICARUS ansible_host=192.168.1.20
+# GLaDOS ansible_host=192.168.1.154
+GLaDOS ansible_host=100.81.137.205
+# GLaDOS ansible_host=glados.netbird.cloud
+
+[desktops]
+
+[laptops]
+WINTERMUTE
+
+[raspberry]
+# LCARS02 ansible_host=192.168.1.133
+TARS
+CASE
+
+[pihole]
+TARS ansible_host=192.168.1.5
+CASE ansible_host=192.168.1.6
+
+[lighthouses]
+AMEE01 ansible_host=88.99.35.249
+AMEE02 ansible_host=206.81.29.132
+
+[nodes]
+
+[skynet:children]
+lighthouses
+nodes
+
+[skynet:vars]

@@ -1,0 +1,8 @@
+---
+dns_server1: "84.200.69.80"
+dns_server2: "84.200.70.40"
+
+pihole_interface: "eth0"
+pihole_config_dir: "/etc/pihole"
+pihole_repo_dir: "~/Pi-hole"
+server_admin_user: "ginner"

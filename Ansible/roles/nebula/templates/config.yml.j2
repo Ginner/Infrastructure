@@ -1,0 +1,62 @@
+---
+pki:
+  ca: |
+    {{ ca_cert | indent(4) }}
+  cert: |
+    {{ host_cert | indent(4) }}
+  key: |
+    {{ host_key | indent(4) }}
+
+static_host_map:
+{% for host in groups['lighthouses'] %}
+{% if hostvars[host]['nebula_ip'] is defined and hostvars[host]['external_addr'] is defined %}
+  "{{ hostvars[host]['nebula_ip'] }}": ["{{ hostvars[host]['external_addr'] }}:{{ hostvars[host]['external_port'] | default('4242') }}"]
+{% endif %}
+{% endfor %}
+
+lighthouse:
+  am_lighthouse: {{ am_lighthouse | default("false") }}
+
+listen:
+  host: 0.0.0.0
+  port: {{ host.external_port | default("4242")}}
+
+punchy:
+  punch: true
+  respond: true
+  delay: 1s
+
+tun:
+  dev: nebula1
+  drop_local_broadcast: false
+  drop_multicast: false
+  tx_queue: 500
+  mtu: 1300
+  routes:
+
+logging:
+  level: info
+  format: text
+
+firewall:
+  outbound_action: drop
+  inbound_action: drop
+
+  conntrack:
+    tcp_timeout: 12m
+    udp_timeout: 3m
+    default_timeout: 10m
+
+  outbound:
+    - port: any
+      proto: any
+      host: any
+
+  inbound:
+    - port: any
+      proto: icmp
+      host: any
+
+    - port: 22
+      proto: tcp
+      group: admin

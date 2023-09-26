@@ -1,0 +1,49 @@
+---
+- name: Install ZFSonlinux
+  ansible.builtin.apt:
+    name: zfsutils-linux
+    state: present
+
+- name: Install packages needed for Sanoid
+  ansible.builtin.apt:
+    pkg:
+      - debhelper
+      - libcapture-tiny-perl
+      - libconfig-inifiles-perl
+      - pv
+      - lzop
+      - mbuffer
+      - build-essential
+
+- name: Clone Sanoid from the official GitHub repo
+  ansible.builtin.git:
+    repo: https://github.com/jimsalterjrs/sanoid.git
+    dest: /src/sanoid
+    update: yes
+    force: yes
+
+- name: Checkout latest stable release
+  ansible.builtin.shell: /usr/bin/git checkout $(git tag | grep "^v" | tail -n 1)
+  args:
+    executable: /bin/bash
+    chdir: /src/sanoid
+
+- name: Link as per the installation guide
+  ansible.builtin.file:
+    src: /src/sanoid/packages/debian
+    dest: /src/sanoid/debian
+    state: link
+
+- name: Build the package
+  ansible.builtin.command: /usr/bin/dpkg-buildpackage -uc -us
+  args:
+      chdir: /src/sanoid
+
+- name: Register latest sanoid version
+  ansible.builtin.command: /usr/bin/cat /src/sanoid/VERSION
+  register: sanoid_version
+
+- name: Install the .deb package
+  apt:
+    deb: "/src/sanoid_{{ sanoid_version.stdout }}_all.deb"
+

@@ -1,0 +1,14 @@
+---
+- hosts: ICARUS
+  become: yes
+  roles:
+    - ubuntu_setup
+    - ubuntu_maintenance
+    - server_hardening
+
+  pre_tasks:
+    - name: Update apt repository cache
+      ansible.builtin.apt: update_cache=yes cache_valid_time=3600
+      when: ansible_distribution == "Ubuntu"
+
+

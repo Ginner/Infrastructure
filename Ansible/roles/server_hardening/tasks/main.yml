@@ -1,0 +1,112 @@
+---
+- name: Make sure multiple admin accounts aren't configured
+  ansible.builtin.shell: "/usr/bin/awk -F: '($3 == \"0\") {print}' /etc/passwd | /usr/bin/wc -l"
+  register: number_of_admin_accounts
+  failed_when: "number_of_admin_accounts.stdout | int != 1"
+
+- name: Check that all passwords are shadowed
+  ansible.builtin.shell: "/usr/bin/awk -F: '($2 != \"x\") {print}' /etc/passwd | /usr/bin/wc -l"
+  register: number_of_non_shadowed_passwords
+  failed_when: "number_of_non_shadowed_passwords.stdout | int != 0"
+
+- name: Use strong hashing algorithm
+  ansible.builtin.lineinfile:
+    dest: /etc/login.defs
+    state: present
+    regexp: '^ENCRYPT_METHOD'
+    line: 'ENCRYPT_METHOD SHA512'
+
+- name: Configure account lockout policies
+  ansible.builtin.blockinfile:
+    path: /etc/pam.d/common-auth
+    block: |
+      auth      required        pam_faillock.so unlock_time=1800
+      account   required        pam_faillock.so per_user deny=5
+
+- name: Disable rlogin, rsh, rcp and telnet
+  ansible.builtin.apt:
+    pkg:
+      - rsh-server
+      - telnet-server
+    state: absent
+
+- name: Udate SSH configuration to be more secure.
+  ansible.builtin.lineinfile:
+    dest: /etc/ssh/sshd_config
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+    state: present
+    validate: 'sshd -t -f %s'
+  with_items:
+    - regexp: "^PasswordAuthentication"
+      line: "PasswordAuthentication no"
+    - regexp: "^PermitRootLogin"
+      line: "PermitRootLogin no"
+    - regexp: "^(#?)Port"
+      line: "Port {{ security_ssh_port }}"
+    - regexp: "^AllowTcpForwarding"
+      line: "AllowTcpForwarding no"
+    - regexp: "^X11Forwarding"
+      line: "X11Forwarding no"
+    - regexp: "^LogLevel"
+      line: "LogLevel INFO"
+    - regexp: "^UsePrivilegeSeparation"
+      line: "UsePrivilegeSeparation yes"
+    - regexp: "^Protocol"
+      line: "Protocol 2"
+    - regexp: "^StrictModes"
+      line: "StrictModes yes"
+    - regexp: "^UsePAM"
+      line: "UsePAM yes"
+    - regexp: "^Subsystem sftp[ \t]+\/usr\/lib\/openssh\/sftp-server"
+      line: "#Subsystem sftp /usr/lib/openssh/sftp-server"
+  notify: restart ssh
+
+- name: Remove unused packages.
+  ansible.builtin.apt:
+    pkg:
+      - nano
+      - sendmail
+      - xserver-xorg-core
+      - libx11.*
+      - libqt.*
+    state: absent
+    purge: true
+    autoremove: true
+  ignore_errors: yes
+
+- name: Secure the configuration of cron
+  ansible.builtin.file:
+    path: { item }
+    state: absent
+  loop:
+    - /etc/cron.deny
+    - /etc/at.deny
+
+- name: Only allow root to use cron
+  ansible.builtin.shell:
+    cmd: echo "root" > {{ item }}
+  loop:
+    - /etc/cron.allow
+    - /etc/at.allow
+
+- name: Disable core dumps
+  ansible.builtin.blockinfile:
+    path: /etc/security/limits.conf
+    insertbefore: "# End of file"
+    block: |
+      * soft core 0
+      * hard core 0
+
+- name: Prevent setuid and setgid programs from dumping core
+  ansible.posix.sysctl:
+    name: fs.suid_dumpable
+    value: '0'
+    sysctl_file: /etc/sysctl.conf
+
+- name: Prevent setuid and setgid programs from dumping core
+  ansible.posix.sysctl:
+    name: kernel.core_pattern
+    value: '| /bin/false'
+    sysctl_file: /etc/sysctl.conf
+    reload: true

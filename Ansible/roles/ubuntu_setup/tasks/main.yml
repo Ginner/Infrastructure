@@ -1,0 +1,135 @@
+---
+- name: Set hostname
+  ansible.builtin.hostname:
+    name: "{{ inventory_hostname }}"
+
+- name: Fix the commandline on ssh-sessions
+  ansible.builtin.copy:
+    dest: /etc/profile.d/fix-term.sh
+    content: "export TERM=linux"
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Make sure the group wheel is present
+  ansible.builtin.group:
+    name: wheel
+    state: present
+
+- name: Give group wheel sudo privileges
+  ansible.builtin.lineinfile:
+    dest: /etc/sudoers
+    state: present
+    regexp: '^%wheel'
+    line: '%wheel ALL=(ALL) NOPASSWD:ALL'
+    validate: 'visudo -cf %s'
+
+- name: Create admin user and add the user to the wheel group
+  ansible.builtin.user:
+    name: "{{ server_admin_user }}"
+    groups: wheel
+    shell: /bin/bash
+    append: yes
+    password: "{{ server_admin_password | password_hash('sha512') }}"
+
+- name: Fix some shell builtins
+  ansible.builtin.blockinfile:
+    path: "/home/{{ server_admin_user }}/.bashrc"
+    block: |
+      export XDG_CONFIG_HOME="/home/{{ server_admin_user }}/.config"
+      export XDG_DATA_HOME="/home/{{ server_admin_user }}/.local/share"
+      alias tmux='tmux -f $XDG_CONFIG_HOME/tmux/tmux.conf'
+
+- name: Create folder for admin user's configuration files
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ server_admin_user }}"
+    group: "{{ server_admin_user }}"
+    mode: '0755'
+  loop:
+    - "/home/{{ server_admin_user }}/.config/tmux"
+    - "/home/{{ server_admin_user }}/.local/share"
+
+- name: Transfer necessary configuration files
+  ansible.builtin.copy:
+    src: ~/Sysadmin/ansible/conf-files/tmux.conf
+    dest: "/home/{{ server_admin_user }}/.config/tmux/tmux.conf"
+    owner: "{{ server_admin_user }}"
+    group: "{{ server_admin_user }}"
+    mode: '0644'
+
+- name: Get list of services
+  service_facts:
+
+- name: Stop and disable snapd
+  ansible.builtin.service:
+    name: snapd
+    state: stopped
+    enabled: no
+  when:
+    - "'snapd' in services"
+    - ansible_distribution == "Ubuntu"
+
+- name: Remove snapd from Ubuntu
+  ansible.builtin.apt:
+    name: snapd
+    state: absent
+    purge: yes
+  when: ansible_distribution == "Ubuntu"
+
+- name: Remove snapd-related directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - /snap
+    - /var/snap
+    - /var/lib/snapd
+    - /home/{{ server_admin_user }}/snap
+  when: ansible_distribution == "Ubuntu"
+
+- name: Disable cloud-init
+  ansible.builtin.copy:
+    dest: /etc/cloud/cloud-init.disabled
+    content: ""
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+
+- name: Disable system bells
+  ansible.builtin.lineinfile:
+    dest: /etc/inputrc
+    state: present
+    regexp: '^# set bell-style none'
+    line: 'set bell-style none'
+
+- name: Check if motd file exists
+  stat:
+    path: /etc/default/motd-news
+  register: motd_file
+
+- name: Disable reaching out for news
+  ansible.builtin.lineinfile:
+    dest: /etc/default/motd-news
+    state: present
+    regexp: '^ENABLED='
+    line: 'ENABLED=0'
+  when: motd_file.stat.exists == True
+
+- name: Update apt repository cache
+  ansible.builtin.apt:
+    update_cache: yes
+    cache_valid_time: 3600
+  when: ansible_distribution == "Ubuntu"
+
+- name: Install remote user packages
+  ansible.builtin.apt:
+    pkg:
+      - tmux
+
+- name: Remove the user 'ubuntu'
+  ansible.builtin.user:
+    name: ubuntu
+    state: absent
+    remove: yes

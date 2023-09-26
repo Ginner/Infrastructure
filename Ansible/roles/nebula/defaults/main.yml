@@ -1,0 +1,13 @@
+---
+nebula_bin_dir: "/opt/nebula"
+nebula_config_dir: "/etc/nebula"
+nebula_ip: 192.168.98.10
+external_addr: "{{ hostvars[inventory_hostname].ansible_host }}"
+am_lighthouse: false
+host_cert: |
+  -----BEGIN NEBULA CERTIFICATE-----
+  btGBApOQqHF9msa2MJ42QKfneJPkh14noUtIN9R8YYNMLiuKh1w4vPqtjq1maZ1WSLCxd0
+  acVb4t4JhL2vD0Y55kCOf476afizynVUL1AbstjM13GdnDw47hVeYszicU4Z2FHNTtwDpp
+  22SQPh109v92Dm2Ih1YUvvh7x1xcRCnAEmuYnihm76N0w12cyFtK5wKxNykuLxIXXi6h2L
+  YcqXBcg637rOcxD2t1gy04cOqXJoo3g=
+  -----END NEBULA CERTIFICATE-----

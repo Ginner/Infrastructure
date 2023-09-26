@@ -1,0 +1,15 @@
+---
+server_admin_user: "ginner"
+
+nebula_bin_dir: "/opt/nebula"
+nebula_config_dir: "/etc/nebula"
+nebula_ip: 10.0.118.1
+external_addr: "{{ ansible_host }}"
+am_lighthouse: true
+host_cert: |
+  -----BEGIN NEBULA CERTIFICATE-----
+  CmMKBkFNRUUwMRIJgeyBUID+//8PKN/6+6EGMJT4/bAGOiDTef/jB28L97sh3KIU
+  lDhj2eE3uAlEPFeuo+9Besf+YEogStrDR3oQ9qR8Ar9YOUVdtN8lid9ULaREjBeD
+  41wTF8YSQLviycafv6IA8hbud0cSS/PP6M7UiWCd//NBVgn5cxEV874+XaHkknpA
+  d1rYUzKLFtIP2fJwmz1A5w7CIr0/eQA=
+  -----END NEBULA CERTIFICATE-----

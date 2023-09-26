@@ -1,0 +1,39 @@
+---
+- hosts: skynet
+  become: yes
+  roles:
+    - ubuntu_setup
+    - ubuntu_maintenance
+    # - server_hardening
+    - nebula
+
+  # pre_tasks:
+  #   - name: Update apt repository cache
+  #     ansible.builtin.apt: update_cache=yes cache_valid_time=3600
+  #     when: ansible_distribution == "Ubuntu"
+
+  # tasks:
+
+
+#     - name: Transfer certs
+#       copy:
+#         src: "{{ item }}"
+#         dest: "{{ nebula_bin_dir }}"
+#         owner: root
+#         group: root
+#         mode: 0644
+#       loop:
+#         - "files/{{ inventory_hostname }}/{{ inventory_hostname }}.crt"
+#         - "files/{{ inventory_hostname }}/ca.crt"
+
+    # - name: Make deencrypted host keyfile
+    #   copy:
+    #     content: "{{ host_key }}"
+    #     dest: "{{ nebula_bin_dir }}/{{ inventory_hostname }}.key"
+    # This doesn't allow for just encrypting the file, but the file has to be outputted to a variable in the secrets.yml file
+    # - name: Transfer and decrypt host key file
+    #   template:
+    #     src: "files/{{ inventory_hostname }}/{{ inventory_hostname }}.key"
+    #     dest: "{{ nebula_bin_dir }}"
+    #   vars:
+    #   file_contents: "{{ lookup('file', 'files/{{ inventory_hostname }}/{{ inventory_hostname }}.key.enc') | b64decode | decrypt }}"

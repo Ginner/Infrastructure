@@ -1,0 +1,76 @@
+---
+- name: Configure Pi-holes
+  hosts: pihole
+  become: yes
+  roles:
+    - ubuntu_setup
+    - ubuntu_maintenance
+
+  # vars_files:
+  #   - secrets.yml
+  #   - vars.yml
+
+  pre_tasks:
+    - name: Update apt repository cache
+      ansible.builtin.apt: update_cache=yes cache_valid_time=3600
+      when: ansible_distribution == "Ubuntu"
+
+  tasks:
+    - name: Install dependencies
+      apt:
+        name:
+          - git
+        state: present
+
+    - name: Ensure target directories exists
+      file:
+        path: "{{ item }}"
+        state: directory
+      loop:
+        - "{{ pihole_config_dir }}"
+        - "{{ pihole_repo_dir }}"
+
+    - name: Write configuration file
+      template:
+        src: "templates/pihole/pihole-setupVars.conf.j2"
+        dest: "{{ pihole_config_dir }}/setupVars.conf"
+
+    - name: Clone the Pi-hole repo
+      git:
+        repo: "https://github.com/pi-hole/pi-hole.git"
+        dest: "{{ pihole_repo_dir }}"
+        depth: 1
+        update: true
+        force: true
+
+    - name: Check if Pi-hole is already installed
+      command: "pihole -v"
+      register: pihole_installed
+      ignore_errors: true
+
+    - name: Install Pi-hole
+      shell:
+        cmd: "./basic-install.sh --unattended"
+        chdir: "~/Pi-hole/automated install/"
+      when: pihole_installed.rc != 0
+
+    - name: Copy over Pi-hole service and timer files
+      copy:
+        src: "{{ item }}"
+        dest: "/etc/systemd/system/"
+        mode: "0644"
+      with_items:
+        - "templates/pihole/pihole-update.service"
+        - "templates/pihole/pihole-update.timer"
+      notify: Reload systemd
+
+    - name: Enable Pi-hole weekly updates
+      systemd:
+        name: pihole-update.timer
+        state: started
+        enabled: true
+
+  handlers:
+    - name: Reload systemd
+      systemd:
+        daemon_reload: true

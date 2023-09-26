@@ -1,0 +1,36 @@
+---
+- hosts: GLaDOS
+  become: yes
+  roles:
+    - ubuntu_setup
+    - ubuntu_maintenance
+    - server_hardening # ?
+    - netbird
+    - podman
+
+  pre_tasks:
+    - name: update apt repository cache
+      ansible.builtin.apt: update_cache=yes cache_valid_time=3600
+      when: ansible_distribution == "ubuntu"
+
+  tasks:
+    - name: Create a folder for the compose project
+      ansible.builtin.file:
+        path: "{{ compose_project_dir }}"
+        state: directory
+        mode: '0755'
+
+    - name: Copy the compose file over
+      ansible.builtin.copy:
+        src: "./GLaDOS/docker-compose.yml"
+        dest: "{{ compose_project_dir }}/docker-compose.yml"
+
+    - name: Copy the Caddyfile over
+      ansible.builtin.copy:
+        src: "./GLaDOS/Caddyfile"
+        dest: "{{ compose_project_dir }}/Caddyfile"
+
+    - name: Run the composefile
+      ansible.builtin.command:
+        chdir: "{{ compose_project_dir }}"
+        cmd: "{{ compose_dir }}/docker-compose up -d"

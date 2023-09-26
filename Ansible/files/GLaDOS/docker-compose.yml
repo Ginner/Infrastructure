@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  reverse-proxy:
+    image: caddy:2.7.4-alpine
+    container_name: caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+
+# ---------------------------------------------------
+
+  unifi-controller:
+    image: lscr.io/linuxserver/unifi-controller:7.5.174
+    container_name: unifi-controller
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Copenhagen
+    volumes:
+      - unify_data:/config
+    ports:
+      - 8443:8443
+      - 3478:3478/udp
+      - 10001:10001/udp
+      - 8080:8080
+    restart: unless-stopped
+
+# ----------------------------------------------------
+
+volumes:
+  caddy_data:
+  caddy_config:
+  unify_data:

@@ -1,0 +1,80 @@
+---
+- name: Install dependencies
+  apt:
+    name:
+      - curl
+      - jq
+    state: present
+
+- name: Create necessary directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: 0755
+  loop:
+    - "{{ nebula_bin_dir }}"
+    - "{{ nebula_config_dir }}"
+
+- name: Get host architecture
+  shell: uname -a | awk '{ print $13 }'
+  register: host_architecture
+
+- name: Display host architecture
+  debug:
+    var: host_architecture.stdout
+
+- name: Get url of the lastest release
+  shell: curl 'https://api.github.com/repos/slackhq/nebula/releases/latest' | jq -r '.assets[] | select(.name=="nebula-linux-{{ architectures[host_architecture.stdout] }}.tar.gz").browser_download_url'
+  register: browser_download_url
+
+- name: Get the version of the latest release
+  shell: echo "{{ browser_download_url.stdout }}" | awk -F '/' '{ print $(NF-1) }' | tr -d v
+  register: latest_version
+
+- name: Display latest release version
+  debug:
+    var: latest_version.stdout
+
+- name: Get the version of Nebula on the host
+  shell: "{{ nebula_bin_dir }}/nebula -version 2>/dev/null | awk '{ print $2 }'"
+  register: host_version
+
+- name: Display host version
+  debug:
+    var: host_version.stdout
+
+- name: Dowload Nebula binaries
+  unarchive:
+    src: "{{ browser_download_url.stdout }}"
+    dest: "{{ nebula_bin_dir }}"
+    remote_src: true
+    owner: root
+    group: root
+    mode: 0755
+  when: host_version.stdout != latest_version.stdout
+
+- name: Deploy configuration file
+  template:
+    src: templates/config.yml.j2
+    dest: "{{ nebula_config_dir }}/config.yml"
+    owner: root
+    group: root
+    mode: 0600
+  register: nebula_conf
+  # notify:
+  #   - restart_nebula
+
+- name: Deploy systemd service
+  template:
+    src: templates/nebula.service.j2
+    dest: /etc/systemd/system/nebula.service
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Enable and start the nebula service
+  service:
+    name: nebula
+    daemon_reload: true
+    state: restarted
+    enabled: true

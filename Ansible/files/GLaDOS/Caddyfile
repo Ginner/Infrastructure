@@ -1,0 +1,3 @@
+unify.glados.netbird.cloud {
+        reverse_proxy unify-controller:8443
+    }

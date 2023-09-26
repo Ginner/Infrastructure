@@ -1,0 +1,20 @@
+---
+- hosts: lcars
+  become: true
+  roles:
+    - ubuntu_setup
+    - ubuntu_maintenance
+    - server_hardening
+    - zfs_on_ubuntu
+
+  pre_tasks:
+    - name: Update apt repository cache
+      ansible.builtin.apt: update_cache=yes cache_valid_time=3600
+      when: ansible_distribution == "Ubuntu"
+
+  tasks:
+    - name: Update all packages
+      ansible.builtin.apt:
+        name: "*"
+        state: latest
+      when: ansible_distribution == "Ubuntu"

@@ -1,0 +1,13 @@
+[Unit]
+Description=Nebula service
+After=network.target
+
+[Service]
+ExecStart={{ nebula_bin_dir }}/nebula -config {{ nebula_config_dir}}/config.yml
+Restart=always
+SyslogIdentifier=nebula
+StandardOutput=syslog
+StandardError=syslog
+
+[Install]
+WantedBy=multi-user.target

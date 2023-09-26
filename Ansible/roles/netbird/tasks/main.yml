@@ -1,0 +1,90 @@
+---
+- name: Install Netbird installation dependencies
+  apt:
+    name:
+      - curl
+      - jq
+    state: present
+    update_cache: yes
+
+- name: Create necessary directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: 0755
+  loop:
+    - "{{ netbird_bin_dir }}"
+
+- name: Get host architecture
+  shell: uname -a | awk '{ print $13 }'
+  register: host_architecture
+
+- name: Display host architecture
+  debug:
+    var: host_architecture.stdout
+
+- name: Get url of the lastest release
+  shell: curl 'https://api.github.com/repos/netbirdio/netbird/releases/latest' | jq -r '.assets[] | select(.name | test("netbird_\\d+\\.\\d+\\.\\d+_linux_{{ architectures[host_architecture.stdout] }}\\.tar\\.gz")) | .browser_download_url'
+  register: browser_download_url
+
+- name: Get the version of the latest release
+  shell: echo "{{ browser_download_url.stdout }}" | awk -F '/' '{ print $(NF-1) }' | tr -d v
+  register: latest_version
+
+- name: Display latest release version
+  debug:
+    var: latest_version.stdout
+
+- name: Get the version of netbird on the host
+  shell: "{{ netbird_bin_dir }}/netbird version 2>/dev/null"
+  register: netbird_version
+  ignore_errors: true
+
+- name: Register if Netbird isn't installed.
+  set_fact:
+    host_version:
+      stdout: "{{ (netbird_version is succeeded) | ternary(netbird_version.stdout, 'Netbird is not installed yet.') }}"
+      succeeded: "{{ netbird_version is succeeded }}"
+
+- name: Display host version
+  debug:
+    var: host_version.stdout
+
+- name: Download the netbird binary
+  unarchive:
+    src: "{{ browser_download_url.stdout }}"
+    dest: "{{ netbird_bin_dir }}"
+    remote_src: true
+    owner: root
+    group: root
+    mode: 0755
+  when: host_version.stdout != latest_version.stdout
+
+# - name: Check if netbird is up and running.
+
+- name: Install the Netbird service on first install.
+  shell: "{{ netbird_bin_dir }}/netbird service install }}"
+  when: netbird_version is failed
+
+- name: Start the Netbird service
+  shell: "{{ netbird_bin_dir }}/netbird service start"
+
+- name: Register with the netbird network
+  shell: "{{ netbird_bin_dir }}/netbird up --setup-key {{ netbird_setup_key }} management-url {{ netbird_url }}"
+  register: result
+  until: "result is not failed"
+  retries: 5
+  delay: 30
+
+- name: pause a bit for netbird coming up
+  pause: seconds=15
+
+- name: Get netbird vpn.
+  shell: "{{ netbird_bin_dir }}/netbird status --ipv4"
+  register: netbird_ip
+
+- name: saving netbird_ip.
+  set_fact:
+    netbird_host_ip: "{{ netbird_ip.stdout }}"
+
+- debug: var=netbird_host_ip
