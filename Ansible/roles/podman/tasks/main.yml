@@ -32,7 +32,6 @@
   ansible.builtin.pip:
     name: podman-compose
 
-
 - name: Start and enable the podman service
   ansible.builtin.systemd:
     state: started
