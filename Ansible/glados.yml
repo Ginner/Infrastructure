@@ -33,4 +33,4 @@
     - name: Run the composefile
       ansible.builtin.command:
         chdir: "{{ compose_project_dir }}"
-        cmd: "{{ compose_dir }}/docker-compose up -d"
+        cmd: "podman-compose up -d"

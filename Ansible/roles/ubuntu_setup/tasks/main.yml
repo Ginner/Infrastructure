@@ -53,7 +53,7 @@
 
 - name: Transfer necessary configuration files
   ansible.builtin.copy:
-    src: ~/Sysadmin/ansible/conf-files/tmux.conf
+    src: "tmux.conf"
     dest: "/home/{{ server_admin_user }}/.config/tmux/tmux.conf"
     owner: "{{ server_admin_user }}"
     group: "{{ server_admin_user }}"
