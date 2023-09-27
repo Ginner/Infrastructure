@@ -3,8 +3,8 @@ LCARS02 ansible_host=192.168.1.140
 
 [utility]
 ICARUS ansible_host=192.168.1.20
-# GLaDOS ansible_host=192.168.1.154
-GLaDOS ansible_host=100.81.137.205
+# GLaDOS ansible_host=192.168.1.159
+GLaDOS ansible_host=100.81.166.3
 # GLaDOS ansible_host=glados.netbird.cloud
 
 [desktops]

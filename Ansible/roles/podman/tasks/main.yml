@@ -38,3 +38,10 @@
     enabled: true
     name: podman.socket
 
+# Getting 'Error validating CNI config file - plugin does not support config version "1.0.0"' Seems to be because the podman version on Ubuntu is OLD and nothing much is being done about it. 2023.09.27 - Check the version later, and see if the task can be deleted
+- name: Attempt at fixing a podman issue with Ubuntu
+  ansible.builtin.lineinfile:
+    path: /etc/cni/net.d/compose_default.conflist
+    regexp: '"cniVersion": "1.0.0"'
+    line: '   "cniVersion": "0.4.0"'
+# Well that didn't work, maybe I should just give up and run Docker...
