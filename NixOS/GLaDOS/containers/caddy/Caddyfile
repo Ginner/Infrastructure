@@ -1,4 +1,4 @@
 100.81.88.62 {
-    tls internal
-    reverse_proxy it-tools:80
+        tls /etc/caddy/cert.pem /etc/caddy/key.pem
+        reverse_proxy it-tools:80
 }

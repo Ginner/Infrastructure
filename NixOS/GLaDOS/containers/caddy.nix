@@ -1,6 +1,10 @@
 {
   image = "caddy:2.7-alpine";
 
+  environment = {
+    "TZ" = "Europe/Copenhagen";
+  };
+
   volumes = [
     "/etc/nixos/containers/caddy/Caddyfile:/etc/caddy/Caddyfile"
     "/etc/nixos/containers/caddy/data:/data"

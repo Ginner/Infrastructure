@@ -1,7 +1,10 @@
 {
     image = "corentinth/it-tools:latest";
+
     autoStart = true;
+
     dependsOn = [ "caddy" ];
+
     extraOptions = [
     "--pull=newer"
     "--name=it-tools"
