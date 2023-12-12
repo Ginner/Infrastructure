@@ -9,7 +9,7 @@
     "/etc/nixos/containers/caddy/Caddyfile:/etc/caddy/Caddyfile"
     "/etc/nixos/containers/caddy/data:/data"
     "/etc/nixos/containers/caddy/config:/config"
-    "/etc/nixos/containers/caddy/GLaDOS.crt:/etc/caddy/cert.pem"
+    "/etc/nixos/containers/caddy/GLaDOS.crt:/etc/caddy/cert.crt"
     "/etc/nixos/containers/caddy/GLaDOS.pem:/etc/caddy/key.pem"
   ];
 
