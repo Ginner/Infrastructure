@@ -11,3 +11,56 @@
     state: latest
     update_cache: yes
 
+- name: uninstall conflicting packages
+  ansible.builtin.apt:
+    name:
+      - docker.io
+      - docker-compose
+      - docker-compose-v2
+      - docker-doc
+      - podman-docker
+      - containerd
+      - runc
+    state: absent
+
+- name: Add Docker's official GPG key
+  apt_key:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    state: present
+
+- name: Get the ubuntu version codename
+  shell: . /etc/os-release && echo "$VERSION_CODENAME"
+  register: os_version_codename
+
+- name: Add docker repo to apt
+  apt_repository:
+    repo: deb https://download.docker.com/linux/ubuntu {{ os_version_codename }} stable
+    state: present
+
+- name: Install docker
+  apt:
+    name:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+      - docker-buildx-plugin
+      - docker-compose-plugin
+    state: latest
+    update_cache: yes
+
+- name: Check that docker is activated
+  service:
+    name: docker
+    state: started
+    enabled: yes
+
+- name: Make sure that group 'docker' exists
+  group:
+    name: docker
+    state: present
+
+- name: Add user to the 'docker' group
+  user:
+    name: {{ server_admin_user }}
+    groups: docker
+    append: yes
