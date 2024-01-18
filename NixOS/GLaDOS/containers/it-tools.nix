@@ -6,8 +6,8 @@
     dependsOn = [ "caddy" ];
 
     extraOptions = [
-    "--pull=newer"
-    "--name=it-tools"
-    "--network=pod-net"
+      "--pull=newer"
+      "--name=it-tools"
+      "--network=pod-net"
     ];
 }
