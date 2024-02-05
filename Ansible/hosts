@@ -7,10 +7,10 @@ ICARUS ansible_host=192.168.1.20
 GLaDOS ansible_host=100.81.166.3
 # GLaDOS ansible_host=glados.netbird.cloud
 
-[desktops]
-
-[laptops]
-WINTERMUTE
+# [desktops]
+#
+# [laptops]
+# WINTERMUTE
 
 [raspberry]
 # LCARS02 ansible_host=192.168.1.133
@@ -21,14 +21,21 @@ CASE
 TARS ansible_host=192.168.1.5
 CASE ansible_host=192.168.1.6
 
-[lighthouses]
-AMEE01 ansible_host=88.99.35.249
-AMEE02 ansible_host=206.81.29.132
+[ve-streamlit]
+# ve-streamlit-01 ansible_host=172.232.134.127 ansible_user=root
+ve-streamlit-01 ansible_host=172.232.134.127
 
-[nodes]
+[ve:children]
+ve-streamlit
 
-[skynet:children]
-lighthouses
-nodes
-
-[skynet:vars]
+# [lighthouses]
+# AMEE01 ansible_host=88.99.35.249
+# AMEE02 ansible_host=206.81.29.132
+#
+# [nodes]
+#
+# [skynet:children]
+# lighthouses
+# nodes
+#
+# [skynet:vars]

@@ -1,0 +1,25 @@
+---
+- hosts: ve-streamlit
+  become: true
+  roles:
+    - ubuntu_setup
+    - ubuntu_maintenance
+    - docker
+
+  pre_tasks:
+    - name: update apt repository cache
+      apt: update_cache=yes cache_valid_time=3600
+      when: ansible_distribution == "ubuntu"
+
+  tasks:
+    - name: create a folder for the streamlit applications
+      file:
+        path: "{{ application_dir }}"
+        state: directory
+        mode: '0755'
+
+    - name: create a folder for the compose project
+      file:
+        path: "{{ compose_project_dir }}"
+        state: directory
+        mode: '0755'

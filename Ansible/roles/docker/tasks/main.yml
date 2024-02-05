@@ -34,7 +34,7 @@
 
 - name: Add docker repo to apt
   apt_repository:
-    repo: deb https://download.docker.com/linux/ubuntu {{ os_version_codename }} stable
+    repo: deb https://download.docker.com/linux/ubuntu "{{ os_version_codename.stdout }}" stable
     state: present
 
 - name: Install docker
@@ -61,6 +61,6 @@
 
 - name: Add user to the 'docker' group
   user:
-    name: {{ server_admin_user }}
+    name: "{{ server_admin_user }}"
     groups: docker
     append: yes

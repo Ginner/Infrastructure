@@ -32,6 +32,13 @@
     append: yes
     password: "{{ server_admin_password | password_hash('sha512') }}"
 
+- name: Set up authorized keys for the admin user
+  authorized_key:
+    user: "{{ server_admin_user }}"
+    state: present
+    manage_dir: yes
+    key: "{{ lookup('file', '/home/ginner/.ssh/id_rsa.pub') }}"
+
 - name: Fix some shell builtins
   ansible.builtin.blockinfile:
     path: "/home/{{ server_admin_user }}/.bashrc"
@@ -133,3 +140,16 @@
     name: ubuntu
     state: absent
     remove: yes
+
+- name: disable ssh login as root
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: "^#?PermitRootLogin"
+    line: "PermitRootLogin no"
+    validate: '/usr/sbin/sshd -t -f %s'
+
+- name: restart ssh service
+  service:
+    name: ssh
+    state: restarted
+

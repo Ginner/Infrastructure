@@ -36,11 +36,11 @@
     regexp: "{{ item.regexp }}"
     line: "{{ item.line }}"
     state: present
-    validate: 'sshd -t -f %s'
+    validate: '/usr/sbin/sshd -t -f %s'
   with_items:
-    - regexp: "^PasswordAuthentication"
+    - regexp: "^#?PasswordAuthentication"
       line: "PasswordAuthentication no"
-    - regexp: "^PermitRootLogin"
+    - regexp: "^#?PermitRootLogin"
       line: "PermitRootLogin no"
     - regexp: "^(#?)Port"
       line: "Port {{ security_ssh_port }}"

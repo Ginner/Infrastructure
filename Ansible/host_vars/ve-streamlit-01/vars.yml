@@ -1,0 +1,17 @@
+---
+server_admin_user: "ginner"
+  # ansible_ssh_port: 2859
+compose_project_dir: "/srv/compose"
+application_dir: "/srv/apps"
+   #ansible_user: ginner
+  #ansible_ssh_port: 2859
+
+# unnecessary_services:
+#   - postfix
+#   - telnet
+# unnecessary_software:
+#   - tcpdump
+#   - nmap-ncat
+#   - wpa_supplicant
+#   - rsh-server
+#   - telnet-server
