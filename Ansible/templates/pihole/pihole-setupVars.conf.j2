@@ -9,5 +9,5 @@ CACHE_SIZE=10000
 DNS_FQDN_REQUIRED=true
 DNS_BOGUS_PRIV=true
 DNSMASQ_LISTENING=local
-WEBPASSWORD={{ pihole_password | password_hash('sha512') }}
+WEBPASSWORD={{ pihole_webpassword | password_hash('sha256') }}
 BLOCKING_ENABLED=true
