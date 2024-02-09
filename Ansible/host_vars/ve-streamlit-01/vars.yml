@@ -3,6 +3,7 @@ server_admin_user: "ginner"
 compose_project_dir: "/srv/compose"
 application_dir: "/srv/apps"
 temp_ssh_key_dir: "/tmp/deploy_key"
+app_name: "lgh-foundation"
    #ansible_user: ginner
   #ansible_ssh_port: 2859
 

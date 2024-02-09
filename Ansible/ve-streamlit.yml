@@ -55,5 +55,15 @@
 
     - name: Write the Dockerfile
       template:
-      src: "templates/ve-streamlit/Dockerfile.js"
-      dest: "{{ application_dir }}/Dockerfile"
+        src: "templates/ve-streamlit/Dockerfile.js"
+        dest: "{{ compose_project_dir }}/Dockerfile"
+
+    - name: Write the docker compose file
+      template:
+        src: "templates/ve-streamlit/docker-compose.yml.js"
+        dest: "{{ compose_project_dir }}/docker-compose.yml"
+
+    - name: Write the Caddyfile
+      template:
+        src: "templates/ve-streamlit/Caddyfile.js"
+        dest: "{{ compose_project_dir }}/Caddyfile"
