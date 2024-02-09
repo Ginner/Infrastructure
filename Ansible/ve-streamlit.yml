@@ -23,3 +23,37 @@
         path: "{{ compose_project_dir }}"
         state: directory
         mode: '0755'
+
+    - name: Ensure a temporary key directory exists
+      file:
+        path: "{{ temp_ssh_key_dir }}"
+        state: directory
+        mode: '0700'
+
+    - name: Write the SSH key to a temporary file
+      copy:
+        content: "{{ github_ssh_deploy_key }}"
+        dest: "{{ temp_ssh_key_dir }}/id_rsa"
+        mode: '0600'
+      no_log: true
+
+    - name: Clone the github application repo
+      git:
+        repo: git@github.com:Rasmus-VE/streamlit.git
+        dest: "{{ application_dir }}/"
+        accept_hostkey: true
+        key_file: "{{ temp_ssh_key_dir}}/id_rsa"
+        version: master  # Change to 'prod' when applicable
+
+    - name: Remove the temporary SSH deploy key file securely
+      shell: shred -zu -n 3 {{ temp_ssh_key_dir|quote }}/id_rsa
+
+    - name: Remove the temporary directory
+      file:
+        path: "{{ temp_ssh_key_dir }}"
+        state: absent
+
+    - name: Write the Dockerfile
+      template:
+      src: "templates/ve-streamlit/Dockerfile.js"
+      dest: "{{ application_dir }}/Dockerfile"

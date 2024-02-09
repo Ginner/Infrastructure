@@ -1,8 +1,8 @@
 ---
 server_admin_user: "ginner"
-  # ansible_ssh_port: 2859
 compose_project_dir: "/srv/compose"
 application_dir: "/srv/apps"
+temp_ssh_key_dir: "/tmp/deploy_key"
    #ansible_user: ginner
   #ansible_ssh_port: 2859
 
