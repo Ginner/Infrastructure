@@ -1,5 +1,6 @@
 ---
 - hosts: ve-streamlit
+  gather_facts: true
   become: true
   roles:
     - ubuntu_setup
@@ -11,16 +12,39 @@
       apt: update_cache=yes cache_valid_time=3600
       when: ansible_distribution == "ubuntu"
 
+
   tasks:
-    - name: create a folder for the streamlit applications
-      file:
-        path: "{{ application_dir }}"
-        state: directory
-        mode: '0755'
+    - name: Enable UFW
+      community.general.ufw:
+        state: enabled
+
+    - name: Make sure I can still SSH into the server
+      community.general.ufw:
+        rule: allow
+        port: '22'
+        proto: tcp
+
+    - name: Make sure traffic is allowed on the http port
+      community.general.ufw:
+        rule: allow
+        port: '80'
+        proto: tcp
+
+    - name: Make sure traffic is allowed on the https port
+      community.general.ufw:
+        rule: allow
+        port: '443'
+        proto: tcp
 
     - name: create a folder for the compose project
       file:
         path: "{{ compose_project_dir }}"
+        state: directory
+        mode: '0755'
+
+    - name: create a folder for the streamlit applications
+      file:
+        path: "{{ compose_project_dir }}{{ application_dir }}"
         state: directory
         mode: '0755'
 
@@ -40,7 +64,7 @@
     - name: Clone the github application repo
       git:
         repo: git@github.com:Rasmus-VE/streamlit.git
-        dest: "{{ application_dir }}/"
+        dest: "{{ compose_project_dir }}{{ application_dir }}/"
         accept_hostkey: true
         key_file: "{{ temp_ssh_key_dir}}/id_rsa"
         version: master  # Change to 'prod' when applicable
@@ -67,3 +91,9 @@
       template:
         src: "templates/ve-streamlit/Caddyfile.js"
         dest: "{{ compose_project_dir }}/Caddyfile"
+
+    - name: Deploy the application with Docker compose
+      community.docker.docker_compose_v2:
+        project_src: "{{ compose_project_dir }}"
+        state: present
+
