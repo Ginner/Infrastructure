@@ -22,8 +22,8 @@ TARS ansible_host=192.168.1.5
 CASE ansible_host=192.168.1.6
 
 [ve-streamlit]
-# ve-streamlit-01 ansible_host=172.232.134.127 ansible_user=root
-ve-streamlit-01 ansible_host=172.232.134.127
+# ve-streamlit-01 ansible_host=172.232.157.244 ansible_user=root
+ve-streamlit-01 ansible_host=172.232.157.244
 
 [ve:children]
 ve-streamlit
