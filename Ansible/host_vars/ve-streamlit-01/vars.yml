@@ -1,10 +1,12 @@
 ---
 server_admin_user: "ginner"
+app_admin_user: "ve-employee"
 compose_project_dir: "/srv/compose"
 application_dir: "/app"
 temp_ssh_key_dir: "/tmp/deploy_key"
 app_name: "lgh-foundation"
-app_web_address: "lgh.ingenioerfirma.dk"
+app_subdomain: "lgh"
+domain_name: "ingenioerfirma.dk"
    #ansible_user: ginner
   #ansible_ssh_port: 2859
 
