@@ -92,8 +92,23 @@
         src: "templates/ve-streamlit/Caddyfile.js"
         dest: "{{ compose_project_dir }}/Caddyfile"
 
+    - name: Pull latest versions of all docker images
+      community.docker.docker_compose_v2:
+        project_src: "{{ compose_project_dir }}"
+        pull: always
+        state: present
+
     - name: Deploy the application with Docker compose
       community.docker.docker_compose_v2:
         project_src: "{{ compose_project_dir }}"
+        build: always
+        recreate: always
         state: present
+
+    - name: Remove dangling Docker images
+      community.docker.docker_prune:
+        images: true
+        networks: true
+        builder_cache: true
+
 
