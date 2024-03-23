@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ pkgs, inputs, config, ... }:
 
 {
   imports =
@@ -6,13 +6,20 @@
       ./hardware-configuration.nix
       ./podman-virtualisation.nix
     ];
-
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
-  networking.hostName = "GLaDOS"; # Define your hostname.
-  networking.networkmanager.enable = true;  # Easiest to use and most distros use this by default.
+  networking = {
+    networkmanager.enable = false;
+    hostName = "GLaDOS";
+    interfaces.eno1.ipv4.addresses = [{
+        address = "192.168.1.18";
+        prefixLength = 24;
+      }];
+    defaultGateway = "192.168.1.1";
+    nameservers = ["192.168.1.5" "192.168.1.6" "192.168.1.1" "84.200.69.80" "84.200.70.40"];
+  };
 
   time.timeZone = "Europe/Copenhagen";
 
@@ -31,12 +38,14 @@
     useXkbConfig = true; # use xkbOptions in tty.
   };
 
+  # Enable flakes
+  nix.settings.experimental-features = "nix-command flakes ";
   # Enable the X11 windowing system.
   # services.xserver.enable = true;
 
   # Configure keymap in X11
-  services.xserver.layout = "dk";
-  services.xserver.xkbOptions = "caps:escape";
+  services.xserver.xkb.layout = "dk";
+  services.xserver.xkb.options = "caps:escape";
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.ginner = {
@@ -52,9 +61,11 @@
   # $ nix search wget
   environment.systemPackages = with pkgs; [
   #   vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
-  #   wget
+    wget
   #   podman
   #   podman-compose
+    neovim
+    rsync
   ];
   # Remove unnecessary default packages.
   environment.defaultPackages = with pkgs; [
@@ -80,7 +91,7 @@
   # Enable netbird
   services.netbird.enable = true;
 
-  system.stateVersion = "23.05"; # Don't change this
+  system.stateVersion = "23.11"; # Don't change this
 
 }
 

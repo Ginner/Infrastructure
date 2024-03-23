@@ -1,13 +1,13 @@
 {
-    image = "corentinth/it-tools:latest";
+  image = "corentinth/it-tools:latest";
 
-    autoStart = true;
+  autoStart = true;
 
-    dependsOn = [ "caddy" ];
+  dependsOn = [ "caddy" ];
 
-    extraOptions = [
-      "--pull=newer"
-      "--name=it-tools"
-      "--network=pod-net"
-    ];
+  extraOptions = [
+    "--pull=newer"
+    "--name=it-tools"
+    "--network=pod-net"
+  ];
 }

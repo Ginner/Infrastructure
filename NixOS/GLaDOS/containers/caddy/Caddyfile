@@ -1,4 +1,4 @@
-100.81.88.62 {
-        tls /etc/caddy/cert.crt /etc/caddy/key.pem
+192.168.1.18 {
+        tls internal
         reverse_proxy it-tools:80
 }

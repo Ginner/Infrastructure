@@ -1,5 +1,5 @@
 {
-  image = "caddy:2.7-alpine";
+  image = "ghcr.io/ginner/docker-caddy-namecheap:1.0";
 
   environment = {
     "TZ" = "Europe/Copenhagen";
@@ -9,8 +9,6 @@
     "/etc/nixos/containers/caddy/Caddyfile:/etc/caddy/Caddyfile"
     "/etc/nixos/containers/caddy/data:/data"
     "/etc/nixos/containers/caddy/config:/config"
-    "/etc/nixos/containers/caddy/GLaDOS.crt:/etc/caddy/cert.crt"
-    "/etc/nixos/containers/caddy/GLaDOS.pem:/etc/caddy/key.pem"
   ];
 
   autoStart = true;
@@ -26,5 +24,6 @@
     "--name=caddy"
     "--hostname=caddy"
     "--network=pod-net"
+    "--authfile=/etc/nixos/containers/caddy/.ghcr-token"
   ];
 }
