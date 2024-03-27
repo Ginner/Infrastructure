@@ -1,3 +1,9 @@
+{ config, ...}:
+
+let
+  authFile = config.age.secrets.ghcr-token.path;
+  envFile = config.age.secrets.namecheap-api.path;
+in
 {
   image = "ghcr.io/ginner/docker-caddy-namecheap:1.0";
 
@@ -24,6 +30,7 @@
     "--name=caddy"
     "--hostname=caddy"
     "--network=pod-net"
-    "--authfile=/etc/nixos/containers/caddy/.ghcr-token"
+    "--authfile=${authFile}"
+    "--env-file=${envFile}"
   ];
 }

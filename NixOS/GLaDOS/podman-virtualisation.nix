@@ -19,13 +19,11 @@
     script.text = ''
       install -d -m 0755 /etc/nixos/containers/caddy/data -o root -g root
       install -d -m 0755 /etc/nixos/containers/caddy/config -o root -g root
+      install -d -m 0755 /etc/nixos/containers/stirling-pdf/extraConfig -o root -g root
+      install -d -m 0755 /etc/nixos/containers/stirling-pdf/trainingData -o root -g root
       '';
   };
 
-#  containers = {
-#      caddy = import ./containers/caddy.nix
-#    };
-#
   systemd.services.create-podman-network = with config.virtualisation.oci-containers; {
     serviceConfig.Type = "oneshot";
     wantedBy = [ "${backend}-caddy.service" ];
@@ -48,12 +46,9 @@
     oci-containers = {
       backend = "podman";
       containers = {
-        caddy = import ./containers/caddy.nix;
+        caddy = import ./containers/caddy.nix {inherit config; };
         it-tools = import ./containers/it-tools.nix;
-#        image = "caddy";
-#        volumes = [
-#          ""
-#        ]
+        stirling-pdf = import ./containers/stirling-pdf.nix;
       };
     };
   };

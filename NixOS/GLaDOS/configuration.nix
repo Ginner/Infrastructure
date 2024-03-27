@@ -1,4 +1,4 @@
-{ pkgs, inputs, config, ... }:
+{ pkgs, config, lib, attrs, ... }:
 
 {
   imports =
@@ -32,20 +32,19 @@
   i18n.extraLocaleSettings = {
     LANG = "en_DK.UTF-8";
   };
-  console = {
-    font = "Lat2-Terminus16";
-  #   keyMap = "dk";
-    useXkbConfig = true; # use xkbOptions in tty.
-  };
-
-  # Enable flakes
-  nix.settings.experimental-features = "nix-command flakes ";
-  # Enable the X11 windowing system.
-  # services.xserver.enable = true;
 
   # Configure keymap in X11
   services.xserver.xkb.layout = "dk";
   services.xserver.xkb.options = "caps:escape";
+
+  console = {
+    font = "Lat2-Terminus16";
+    useXkbConfig = true; # use xkbOptions in tty.
+  };
+
+  # Enable flakes
+  nix.settings.experimental-features = [ "nix-command" "flakes" ];
+
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.ginner = {
@@ -57,19 +56,26 @@
     ];
   };
 
-  # List packages installed in system profile. To search, run:
-  # $ nix search wget
+  age.secrets = {
+    ghcr-token.file = ./.secrets/ghcr-token.age;
+    namecheap-api.file = ./.secrets/namecheap-api.age;
+  };
+
   environment.systemPackages = with pkgs; [
-  #   vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
     wget
-  #   podman
-  #   podman-compose
-    neovim
+  #  podman
+  #  podman-compose
+  #  neovim
     rsync
+    attrs.agenix.packages."${pkgs.system}".default
   ];
+
   # Remove unnecessary default packages.
   environment.defaultPackages = with pkgs; [
   ];
+
+  programs.neovim.enable = true;
+  programs.neovim.defaultEditor = true;
 
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
@@ -81,15 +87,15 @@
 
   # List services that you want to enable:
 
-  # Enable the OpenSSH daemon.
   services.openssh = {
     enable = true;
     settings.PasswordAuthentication = false;
     settings.PermitRootLogin = "yes";
   };
 
-  # Enable netbird
   services.netbird.enable = true;
+
+  services.fwupd.enable = true;
 
   system.stateVersion = "23.11"; # Don't change this
 

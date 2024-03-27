@@ -1,4 +1,16 @@
-192.168.1.18 {
-        tls internal
-        reverse_proxy it-tools:80
+*.ginnerskov.co {
+    tls {
+        dns namecheap {
+            api_key {env.NAMECHEAP_API_KEY}
+            user {env.NAMECHEAP_USER}
+            api_endpoint https://api.namecheap.com/xml.response
+            client_ip {env.CLIENT_IP}
+        }
+    }
+
+    @it-tools host it-tools.ginnerskov.co
+    reverse_proxy @it-tools it-tools:80
+
+    @stirling-pdf host stirling-pdf.ginnerskov.co
+    reverse_proxy @stirling-pdf stirling-pdf:8080
 }
