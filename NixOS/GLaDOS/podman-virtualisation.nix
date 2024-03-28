@@ -3,7 +3,22 @@
 
   networking.firewall = {
     enable = true;
-    allowedTCPPorts = [ 80 443 ]; # Allow HTTP and HTTPS
+    allowedTCPPorts = [
+      80      # Allow HTTP and HTTPS
+      443
+      29811   # For omada controller
+      8088
+      8043
+      29812
+      29813
+      29814
+      29815
+      29816
+    ];
+    allowedUDPPorts = [
+      29810
+      27001   # For omada controller
+    ];
     interfaces.podman1 = {
       allowedUDPPorts = [ 53 ]; # Needed for containers to resolve DNS, try turning it off after getting the setup working
     };
@@ -49,6 +64,7 @@
         caddy = import ./containers/caddy.nix {inherit config; };
         it-tools = import ./containers/it-tools.nix;
         stirling-pdf = import ./containers/stirling-pdf.nix;
+        omada = import ./containers/omada.nix;
       };
     };
   };

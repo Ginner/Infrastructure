@@ -13,4 +13,9 @@
 
     @stirling-pdf host stirling-pdf.ginnerskov.co
     reverse_proxy @stirling-pdf stirling-pdf:8080
+
+    @omada host omada.ginnerskov.co
+    handle @omada {
+        reverse_proxy 10.89.0.1:8088
+    }
 }
