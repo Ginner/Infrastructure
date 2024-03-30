@@ -65,6 +65,7 @@
         it-tools = import ./containers/it-tools.nix;
         stirling-pdf = import ./containers/stirling-pdf.nix;
         omada = import ./containers/omada.nix;
+        linkding = import ./containers/linkding.nix;
       };
     };
   };

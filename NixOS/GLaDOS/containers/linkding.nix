@@ -3,6 +3,10 @@
 
   autoStart = true;
 
+  environment = {
+    "LS_ENABLE_AUTH_PROXY" = "False";
+  };
+
   dependsOn = [ "caddy" ];
 
   volumes = [
