@@ -74,9 +74,42 @@
   environment.defaultPackages = with pkgs; [
   ];
 
-  programs.neovim.enable = true;
-  programs.neovim.defaultEditor = true;
+  programs = {
+    neovim = {
+      enable = true;
+      defaultEditor = true;
+    };
 
+    tmux = {
+      enable = true;
+      shortcut = "a";
+      keyMode = "vi";
+      clock24 = true;
+      baseIndex = 1;
+      extraConfig = ''
+        unbind x
+        bind x kill-pane
+        bind X confirm-before -p "Kill entire session? (y/n)" kill-session
+        bind | split-window -h
+        bind - split-window -v
+        set-option -g repeat-time 750
+        set -g status-left-length 18
+        set -g status-left " [#{session_name}] "
+        set -g status-justify centre
+        set -g status-right "#{?window_bigger,[#{window_offset_x}#,#{window_offset_y}] ,}  #{=21:pane_title}  %H:%M %F "
+        set -g status-style bg=green,fg=black,bold
+      '';
+    };
+  };
+
+  environment.interactiveShellInit = ''
+    la='ls -lAh --color=auto'
+    ll='ls -lh --color=auto'
+    cp='cp -riv'
+    mv='mv -iv'
+    rm='rm -I'
+    mkdir='mkdir -vp'
+  '';
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
   # programs.mtr.enable = true;
