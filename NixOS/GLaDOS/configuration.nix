@@ -84,6 +84,8 @@
       enable = true;
       shortcut = "a";
       keyMode = "vi";
+      customPaneNavigationAndResize = true;
+      escapeTime = 0;
       clock24 = true;
       baseIndex = 1;
       extraConfig = ''
@@ -92,11 +94,11 @@
         bind X confirm-before -p "Kill entire session? (y/n)" kill-session
         bind | split-window -h
         bind - split-window -v
-        set-option -g repeat-time 750
-        set -g status-left-length 18
+        set -g status-left-length 60
+        set -g status-right-length 60
         set -g status-left " [#{session_name}] "
-        set -g status-justify centre
-        set -g status-right "#{?window_bigger,[#{window_offset_x}#,#{window_offset_y}] ,}  #{=21:pane_title}  %H:%M %F "
+        set -g status-justify absolute-centre
+        set -g status-right "#{?window_bigger,[#{window_offset_x}#,#{window_offset_y}] ,}  #{pane_title}  %H:%M %F "
         set -g status-style bg=green,fg=black,bold
       '';
     };
