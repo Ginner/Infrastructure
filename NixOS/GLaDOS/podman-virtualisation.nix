@@ -48,6 +48,17 @@
       '';
   };
 
+  systemd.services.create-nextcloud-volumes = {
+    after = [ "create-podman-network.service" ];
+    requires = [ "create-podman-network.service" ];
+    wantedBy = [ "multi-user.target" ];
+    serviceConfig.Type = "oneshot";
+    script = ''
+      ${pkgs.podman}/bin/podman volume exists nextcloud_aio_mastercontainer || \
+      ${pkgs.podman}/bin/podman volume create nextcloud_aio_mastercontainer
+      '';
+  };
+
   virtualisation = {
     podman = {
       enable = true;
@@ -67,6 +78,7 @@
         omada = import ./containers/omada.nix;
         linkding = import ./containers/linkding.nix;
         excalidraw = import ./containers/excalidraw.nix;
+        nextcloud-aio-mastercontainer = import ./containers/nextcloud-aio.nix;
       };
     };
   };
