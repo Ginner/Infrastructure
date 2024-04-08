@@ -7,8 +7,6 @@
     "LS_ENABLE_AUTH_PROXY" = "False";
   };
 
-  dependsOn = [ "caddy" ];
-
   volumes = [
     "/etc/nixos/containers/linkding/data:/etc/linkding/data"
   ];

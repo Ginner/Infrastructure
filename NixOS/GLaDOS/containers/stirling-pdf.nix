@@ -8,8 +8,6 @@
 
   autoStart = true;
 
-  dependsOn = [ "caddy" ];
-
   volumes = [
     "/etc/nixos/containers/stirling-pdf/extraConfig:/configs"
     "/etc/nixos/containers/stirling-pdf/trainingData:/usr/share/tessdata"

@@ -3,8 +3,6 @@
 
   autoStart = true;
 
-  dependsOn = [ "caddy" ];
-
   extraOptions = [
     "--pull=newer"
     "--name=it-tools"
