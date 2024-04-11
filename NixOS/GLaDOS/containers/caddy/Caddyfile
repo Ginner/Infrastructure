@@ -1,4 +1,28 @@
-100.81.88.62 {
-        tls /etc/caddy/cert.crt /etc/caddy/key.pem
-        reverse_proxy it-tools:80
+*.ginnerskov.co {
+    tls {
+        dns namecheap {
+            api_key {env.NAMECHEAP_API_KEY}
+            user {env.NAMECHEAP_USER}
+            api_endpoint https://api.namecheap.com/xml.response
+            client_ip {env.CLIENT_IP}
+        }
+    }
+
+    @it-tools host it-tools.ginnerskov.co
+    reverse_proxy @it-tools it-tools:80
+
+    @stirling-pdf host stirling-pdf.ginnerskov.co
+    reverse_proxy @stirling-pdf stirling-pdf:8080
+
+    @linkding host linkding.ginnerskov.co
+    reverse_proxy @linkding linkding:9090
+
+    @excalidraw host excalidraw.ginnerskov.co
+    reverse_proxy @excalidraw excalidraw:80
+
+    @nextcloud-aio-mastercontainer host cloud.ginnerskov.co
+    reverse_proxy @nextcloud-aio-mastercontainer host.containers.internal:11000
+
+    @omada host omada.ginnerskov.co
+    reverse_proxy @omada 10.89.0.1:8088
 }

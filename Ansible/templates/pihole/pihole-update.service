@@ -5,8 +5,7 @@ After=pihole-FTL.service
 
 [Service]
 Type=oneshot
-ExecStart=/usr/local/bin/pihole updatePihole
-ExecStart=/usr/local/bin/pihole updateGravity
+ExecStart=/bin/bash -c '/usr/local/bin/pihole updatePihole && /usr/local/bin/pihole updateGravity && /usr/local/bin/pihole restartdns'
 
 [Install]
 WantedBy=multi-user.target

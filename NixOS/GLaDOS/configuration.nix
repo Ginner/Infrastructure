@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ pkgs, config, lib, attrs, ... }:
 
 {
   imports =
@@ -6,13 +6,20 @@
       ./hardware-configuration.nix
       ./podman-virtualisation.nix
     ];
-
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
-  networking.hostName = "GLaDOS"; # Define your hostname.
-  networking.networkmanager.enable = true;  # Easiest to use and most distros use this by default.
+  networking = {
+    networkmanager.enable = false;
+    hostName = "GLaDOS";
+    interfaces.eno1.ipv4.addresses = [{
+        address = "192.168.1.18";
+        prefixLength = 24;
+      }];
+    defaultGateway = "192.168.1.1";
+    nameservers = ["192.168.1.5" "192.168.1.6" "192.168.1.1" "84.200.69.80" "84.200.70.40"];
+  };
 
   time.timeZone = "Europe/Copenhagen";
 
@@ -25,18 +32,19 @@
   i18n.extraLocaleSettings = {
     LANG = "en_DK.UTF-8";
   };
+
+  # Configure keymap in X11
+  services.xserver.xkb.layout = "dk";
+  services.xserver.xkb.options = "caps:escape";
+
   console = {
     font = "Lat2-Terminus16";
-  #   keyMap = "dk";
     useXkbConfig = true; # use xkbOptions in tty.
   };
 
-  # Enable the X11 windowing system.
-  # services.xserver.enable = true;
+  # Enable flakes
+  nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
-  # Configure keymap in X11
-  services.xserver.layout = "dk";
-  services.xserver.xkbOptions = "caps:escape";
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.ginner = {
@@ -48,18 +56,62 @@
     ];
   };
 
-  # List packages installed in system profile. To search, run:
-  # $ nix search wget
+  age.secrets = {
+    ghcr-token.file = ./.secrets/ghcr-token.age;
+    namecheap-api.file = ./.secrets/namecheap-api.age;
+  };
+
   environment.systemPackages = with pkgs; [
-  #   vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
-  #   wget
-  #   podman
-  #   podman-compose
+    wget
+  #  podman
+  #  podman-compose
+  #  neovim
+    rsync
+    attrs.agenix.packages."${pkgs.system}".default
   ];
+
   # Remove unnecessary default packages.
   environment.defaultPackages = with pkgs; [
   ];
 
+  programs = {
+    neovim = {
+      enable = true;
+      defaultEditor = true;
+    };
+
+    tmux = {
+      enable = true;
+      shortcut = "a";
+      keyMode = "vi";
+      customPaneNavigationAndResize = true;
+      escapeTime = 0;
+      clock24 = true;
+      baseIndex = 1;
+      extraConfig = ''
+        unbind x
+        bind x kill-pane
+        bind X confirm-before -p "Kill entire session? (y/n)" kill-session
+        bind | split-window -h
+        bind - split-window -v
+        set -g status-left-length 60
+        set -g status-right-length 60
+        set -g status-left " [#{session_name}] "
+        set -g status-justify absolute-centre
+        set -g status-right "#{?window_bigger,[#{window_offset_x}#,#{window_offset_y}] ,}  #{pane_title}  %H:%M %F "
+        set -g status-style bg=green,fg=black,bold
+      '';
+    };
+  };
+
+  environment.interactiveShellInit = ''
+    la='ls -lAh --color=auto'
+    ll='ls -lh --color=auto'
+    cp='cp -riv'
+    mv='mv -iv'
+    rm='rm -I'
+    mkdir='mkdir -vp'
+  '';
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
   # programs.mtr.enable = true;
@@ -70,17 +122,17 @@
 
   # List services that you want to enable:
 
-  # Enable the OpenSSH daemon.
   services.openssh = {
     enable = true;
     settings.PasswordAuthentication = false;
     settings.PermitRootLogin = "yes";
   };
 
-  # Enable netbird
   services.netbird.enable = true;
 
-  system.stateVersion = "23.05"; # Don't change this
+  services.fwupd.enable = true;
+
+  system.stateVersion = "23.11"; # Don't change this
 
 }
 

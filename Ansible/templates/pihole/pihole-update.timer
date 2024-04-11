@@ -4,7 +4,7 @@ Description=Timer to update Pi-hole weekly
 [Timer]
 OnCalendar=Mon *-*-* 02:00:00
 Unit=pihole-update.service
-Persisten=true
+Persistent=true
 
 [Install]
 WantedBy=timers.target

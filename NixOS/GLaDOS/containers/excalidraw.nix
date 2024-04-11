@@ -1,11 +1,11 @@
 {
-  image = "corentinth/it-tools:latest";
+  image = "docker.io/excalidraw/excalidraw:latest";
 
   autoStart = true;
 
   extraOptions = [
     "--pull=newer"
-    "--name=it-tools"
+    "--name=excalidraw"
     "--network=pod-net"
   ];
 }

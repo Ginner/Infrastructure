@@ -3,7 +3,25 @@
 
   networking.firewall = {
     enable = true;
-    allowedTCPPorts = [ 80 443 ];
+    allowedTCPPorts = [
+      80      # Allow HTTP and HTTPS
+      443
+      11000    # NextCloud
+      8080
+      8443
+      29811   # For omada controller
+      8088
+      8043
+      29812
+      29813
+      29814
+      29815
+      29816
+    ];
+    allowedUDPPorts = [
+      29810
+      27001   # For omada controller
+    ];
     interfaces.podman1 = {
       allowedUDPPorts = [ 53 ]; # Needed for containers to resolve DNS, try turning it off after getting the setup working
     };
@@ -19,13 +37,11 @@
     script.text = ''
       install -d -m 0755 /etc/nixos/containers/caddy/data -o root -g root
       install -d -m 0755 /etc/nixos/containers/caddy/config -o root -g root
+      install -d -m 0755 /etc/nixos/containers/stirling-pdf/extraConfig -o root -g root
+      install -d -m 0755 /etc/nixos/containers/stirling-pdf/trainingData -o root -g root
       '';
   };
 
-#  containers = {
-#      caddy = import ./containers/caddy.nix
-#    };
-#
   systemd.services.create-podman-network = with config.virtualisation.oci-containers; {
     serviceConfig.Type = "oneshot";
     wantedBy = [ "${backend}-caddy.service" ];
@@ -35,10 +51,22 @@
       '';
   };
 
+  systemd.services.create-nextcloud-volumes = {
+    after = [ "create-podman-network.service" ];
+    requires = [ "create-podman-network.service" ];
+    wantedBy = [ "multi-user.target" ];
+    serviceConfig.Type = "oneshot";
+    script = ''
+      ${pkgs.podman}/bin/podman volume exists nextcloud_aio_mastercontainer || \
+      ${pkgs.podman}/bin/podman volume create nextcloud_aio_mastercontainer
+      '';
+  };
+
   virtualisation = {
     podman = {
       enable = true;
       dockerCompat = true;
+      dockerSocket.enable = true;
       defaultNetwork.settings.dns_enabled = true;
       autoPrune = {
         enable = true;
@@ -48,12 +76,13 @@
     oci-containers = {
       backend = "podman";
       containers = {
-        caddy = import ./containers/caddy.nix;
+        caddy = import ./containers/caddy.nix {inherit config; };
         it-tools = import ./containers/it-tools.nix;
-#        image = "caddy";
-#        volumes = [
-#          ""
-#        ]
+        stirling-pdf = import ./containers/stirling-pdf.nix;
+        omada = import ./containers/omada.nix;
+        linkding = import ./containers/linkding.nix;
+        excalidraw = import ./containers/excalidraw.nix;
+        nextcloud-aio-mastercontainer = import ./containers/nextcloud-aio.nix;
       };
     };
   };
