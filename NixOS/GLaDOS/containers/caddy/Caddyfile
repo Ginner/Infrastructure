@@ -21,7 +21,7 @@
     reverse_proxy @excalidraw excalidraw:80
 
     @nextcloud-aio-mastercontainer host cloud.ginnerskov.co
-    reverse_proxy @nextcloud-aio-mastercontainer nextcloud-aio-mastercontainer:8080
+    reverse_proxy @nextcloud-aio-mastercontainer host.containers.internal:11000
 
     @omada host omada.ginnerskov.co
     reverse_proxy @omada 10.89.0.1:8088

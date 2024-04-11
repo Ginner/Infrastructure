@@ -6,6 +6,9 @@
     allowedTCPPorts = [
       80      # Allow HTTP and HTTPS
       443
+      11000    # NextCloud
+      8080
+      8443
       29811   # For omada controller
       8088
       8043
@@ -63,6 +66,7 @@
     podman = {
       enable = true;
       dockerCompat = true;
+      dockerSocket.enable = true;
       defaultNetwork.settings.dns_enabled = true;
       autoPrune = {
         enable = true;
