@@ -21,18 +21,6 @@ CASE
 TARS ansible_host=192.168.1.5
 CASE ansible_host=192.168.1.6
 
-[ve-streamlit]
-# ve-streamlit-01 ansible_host=49.13.168.231 ansible_ssh_private_key_file=/home/ginner/.ssh/id_ed25519_ve
-ve-streamlit-01 ansible_host=49.13.168.231
-# ve-streamlit-02 ansible_host=23.88.61.6 ansible_ssh_private_key_file=/home/ginner/.ssh/id_ed25519_ve
-ve-streamlit-02 ansible_host=23.88.61.6
-
-# ve-streamlit-01 ansible_host=172.232.157.244 ansible_user=root
-# ve-streamlit-03 ansible_host=172.232.157.244
-
-[ve:children]
-ve-streamlit
-
 # [lighthouses]
 # AMEE01 ansible_host=88.99.35.249
 # AMEE02 ansible_host=206.81.29.132
