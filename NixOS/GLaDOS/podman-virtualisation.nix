@@ -67,6 +67,7 @@
         omada = import ./containers/omada.nix;
         linkding = import ./containers/linkding.nix;
         excalidraw = import ./containers/excalidraw.nix;
+        baikal = import ./containers/baikal.nix;
       };
     };
   };

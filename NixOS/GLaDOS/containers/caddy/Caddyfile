@@ -20,6 +20,9 @@
     @excalidraw host excalidraw.ginnerskov.co
     reverse_proxy @excalidraw excalidraw:80
 
+    @baikal host baikal.ginnerskov.co
+    reverse_proxy @baikal baikal:80
+
     @omada host omada.ginnerskov.co
     reverse_proxy @omada 10.89.0.1:8088
 }
