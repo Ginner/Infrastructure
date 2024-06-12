@@ -13,6 +13,6 @@ COPY .{{ application_dir }} .
 
 RUN pip3 install -r requirements.txt
 
-EXPOSE 8501
+EXPOSE {{ port }}
 
-ENTRYPOINT ["python", "-m", "streamlit", "run", "./apps/LGH-foundation.py", "--server.port=8501", "--server.address=0.0.0.0"]
+ENTRYPOINT ["python", "-m", "streamlit", "run", "./apps/{{ app_name }}.py", "--server.port={{ port }}", "--server.address=0.0.0.0"]

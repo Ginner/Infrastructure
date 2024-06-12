@@ -4,7 +4,13 @@ app_admin_user: "ve-employee"
 compose_project_dir: "/srv/compose"
 application_dir: "/app"
 temp_ssh_key_dir: "/tmp/deploy_key"
-app_name: "lgh-foundation"
+apps: 
+  - name: "LGH-foundation"
+    port: 8501
+  - name: "Concrete-bending"
+    port: 8502
+  - name: "NM-diagram"
+    port: 8503
 app_subdomain: "software"
 domain_name: "valueengineering.dk"
    #ansible_user: ginner
