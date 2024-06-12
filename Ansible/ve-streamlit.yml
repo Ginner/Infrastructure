@@ -36,17 +36,25 @@
         port: '443'
         proto: tcp
 
-    - name: create a folder for the compose project
-      file:
-        path: "{{ compose_project_dir }}"
-        state: directory
-        mode: '0755'
+#    - name: create a folder for the compose project
+#      file:
+#        path: "{{ compose_project_dir }}"
+#        state: directory
+#        mode: '0755'
 
-    - name: create a folder for the streamlit applications
+#    - name: create a folder for the streamlit applications
+#      file:
+#        path: "{{ compose_project_dir }}{{ application_dir }}"
+#        state: directory
+#        mode: '0755'
+
+    - name: create folders for the compose applications
       file:
-        path: "{{ compose_project_dir }}{{ application_dir }}"
+        path: "{{ compose_project_dir }}{{ application_dir }}/{{ item.name }}"
         state: directory
         mode: '0755'
+        recurse: yes
+      loop: "{{ apps }}"
 
     - name: Ensure a temporary key directory exists
       file:
@@ -77,10 +85,15 @@
         path: "{{ temp_ssh_key_dir }}"
         state: absent
 
-    - name: Write the Dockerfile
+    - name: Write the Dockerfiles
       template:
         src: "templates/ve-streamlit/Dockerfile.js"
-        dest: "{{ compose_project_dir }}/Dockerfile"
+        dest: "{{ compose_project_dir }}/{{ item.name }}/Dockerfile"
+      loop: "{{ apps }}"
+      vars:
+        port: "{{ item.port }}"
+        app_name: "{{ item.name }}"
+        application_dir: "{{ application_dir }}"
 
     - name: Write the docker compose file
       template:

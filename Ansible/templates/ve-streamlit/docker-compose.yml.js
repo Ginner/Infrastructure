@@ -1,10 +1,12 @@
 services:
-  {{ app_name }}:
-    build: .
-    container_name: {{ app_name }}
+{% for app in apps %}
+  {{ app.name }}:
+    build: ./{{ app.name }}
+    container_name: {{ app.name }}
     restart: unless-stopped
     ports:
-      - "8501:8501"
+      - "{{ app.port }}:{{ app.port }}"
+{% endfor %}
 
   caddy:
     image: caddy:latest
