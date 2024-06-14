@@ -104,14 +104,14 @@
     };
   };
 
-  environment.interactiveShellInit = ''
-    la='ls -lAh --color=auto'
-    ll='ls -lh --color=auto'
-    cp='cp -riv'
-    mv='mv -iv'
-    rm='rm -I'
-    mkdir='mkdir -vp'
-  '';
+  environment.shellAliases = {
+    la = "ls -lAh --color=auto";
+    ll = "ls -lh --color=auto";
+    cp = "cp -riv";
+    mv = "mv -iv";
+    rm = "rm -I";
+    mkdir = "mkdir -vp";
+  };
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
   # programs.mtr.enable = true;
