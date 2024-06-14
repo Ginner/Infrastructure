@@ -36,8 +36,6 @@
       install -d -m 0755 /etc/nixos/containers/caddy/config -o root -g root
       install -d -m 0755 /etc/nixos/containers/stirling-pdf/extraConfig -o root -g root
       install -d -m 0755 /etc/nixos/containers/stirling-pdf/trainingData -o root -g root
-      install -d -m 0755 /etc/nixos/containers/baikal/data -o root -g root
-      install -d -m 0755 /etc/nixos/containers/baikal/config -o root -g root
       '';
   };
 
