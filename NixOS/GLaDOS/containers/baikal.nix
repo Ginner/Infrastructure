@@ -1,5 +1,5 @@
 {
-  image = "chulka/baikal:nginx";
+  image = "ckulka/baikal:nginx";
 
   autoStart = true;
 
