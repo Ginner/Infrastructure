@@ -5,7 +5,7 @@ let
   envFile = config.age.secrets.namecheap-api.path;
 in
 {
-  image = "ghcr.io/ginner/docker-caddy-namecheap:1.0";
+  image = "ghcr.io/ginner/docker-caddy-namecheap:2.0";
 
   environment = {
     "TZ" = "Europe/Copenhagen";
