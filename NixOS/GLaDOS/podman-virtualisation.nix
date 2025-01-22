@@ -19,11 +19,8 @@
       29810
       27001   # For omada controller
     ];
-    interfaces.podman1 = {
-      allowedUDPPorts = [ 53 ]; # Needed for containers to resolve DNS,
-    };
-    interfaces.podman2 = {
-      allowedUDPPorts = [ 53 ]; # ip link shows mulitple podman interfaces (2 NICs?)
+    interfaces."podman+" = {
+      allowedUDPPorts = [ 53 ]; # Needed for containers to resolve DNS, handle multiple/differing podman interfaces
     };
   };
 

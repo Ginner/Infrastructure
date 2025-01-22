@@ -18,7 +18,7 @@
         prefixLength = 24;
       }];
     defaultGateway = "192.168.1.1";
-    nameservers = ["192.168.1.5" "192.168.1.6" "192.168.1.1" "84.200.69.80" "84.200.70.40"];
+    nameservers = ["192.168.1.1" "84.200.69.80" "84.200.70.40"];
   };
 
   time.timeZone = "Europe/Copenhagen";
