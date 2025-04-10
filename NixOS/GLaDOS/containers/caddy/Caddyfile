@@ -28,4 +28,8 @@
 
     @jupyter host jupyter.ginnerskov.co
     reverse_proxy @jupyter jupyter:8888
+
+    @forgejo host forgejo.ginnerskov.co
+    reverse_proxy @forgejo forgejo:3000
+
 }

@@ -5,6 +5,7 @@
     enable = true;
     allowedTCPPorts = [
       80      # Allow HTTP and HTTPS
+      222     # SSH for forgejo
       443
       29811   # For omada controller
       8088
@@ -69,6 +70,7 @@
         excalidraw = import ./containers/excalidraw.nix;
         baikal = import ./containers/baikal.nix;
         jupyter = import ./containers/jupyter.nix;
+        forgejo = import ./containers/forgejo.nix;
       };
     };
   };
