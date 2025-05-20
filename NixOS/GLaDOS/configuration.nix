@@ -67,6 +67,7 @@
   #  podman-compose
   #  neovim
     rsync
+    tailscale
     attrs.agenix.packages."${pkgs.system}".default
   ];
 
@@ -128,7 +129,7 @@
     settings.PermitRootLogin = "yes";
   };
 
-  services.netbird.enable = true;
+  services.tailscale.enable = true;
 
   services.fwupd.enable = true;
 
