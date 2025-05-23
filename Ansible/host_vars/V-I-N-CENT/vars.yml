@@ -1,0 +1,4 @@
+---
+server_admin_user: "ginner"
+ansible_ssh_port: 22
+

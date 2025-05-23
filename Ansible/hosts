@@ -1,10 +1,11 @@
-[lcars]
-LCARS02 ansible_host=192.168.1.140
+# [lcars]
+# LCARS02 ansible_host=192.168.1.140
 
 [utility]
-ICARUS ansible_host=192.168.1.20
+V-I-N-CENT ansible_host=192.168.2.116
+# ICARUS ansible_host=192.168.1.20
 # GLaDOS ansible_host=192.168.1.159
-GLaDOS ansible_host=100.81.166.3
+# GLaDOS ansible_host=100.81.166.3
 # GLaDOS ansible_host=glados.netbird.cloud
 
 # [desktops]
@@ -14,12 +15,12 @@ GLaDOS ansible_host=100.81.166.3
 
 [raspberry]
 # LCARS02 ansible_host=192.168.1.133
-TARS
-CASE
+# TARS
+# CASE
 
 [pihole]
-TARS ansible_host=192.168.1.5
-CASE ansible_host=192.168.1.6
+# TARS ansible_host=192.168.1.5
+# CASE ansible_host=192.168.1.6
 
 # [lighthouses]
 # AMEE01 ansible_host=88.99.35.249

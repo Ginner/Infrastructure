@@ -1,0 +1,13 @@
+---
+- hosts: V-I-N-CENT
+  become: true
+  roles:
+    - ubuntu_setup
+    - ubuntu_maintenance
+    - server_hardening
+    - tailscale
+    - technitium
+
+  pre_tasks:
+
+  tasks:

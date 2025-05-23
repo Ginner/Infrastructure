@@ -1,0 +1,51 @@
+---
+- name: Get the ubuntu version codenamme
+  ansible.builtin.command:
+    cmd: lsb_release -cs
+  register: ubuntu_codename
+  changed_when: false
+
+- name: Display the ubuntu version codenamme
+  ansible.builtin.debug:
+    msg: "The Ubuntu version codename is {{ ubuntu_codename.stdout }}"
+
+- name: Download Tailscale GPG Key
+  ansible.builtin.uri:
+    dest: /usr/share/keyrings/tailscale-archive-keyring.gpg
+    url: https://pkgs.tailscale.com/stable/ubuntu/{{ ubuntu_codename.stdout }}.noarmor.gpg
+
+- name: Add Tailscale repository
+  ansible.builtin.uri:
+    dest: /etc/apt/sources.list.d/tailscale.list
+    url: https://pkgs.tailscale.com/stable/ubuntu/{{ ubuntu_codename.stdout }}.tailscale-keyring.list
+
+- name: Install Tailscale
+  ansible.builtin.apt:
+    name: tailscale
+    update_cache: true
+    state: present
+
+- name: Enable and start the server
+  ansible.builtin.service:
+    name: tailscaled
+    state: started
+    enabled: true
+
+- name: Check tailscale status
+  ansible.builtin.command:
+    cmd: tailscale status
+  register: tailscale_status
+  changed_when: false
+  failed_when: false
+
+- name: Run tailscale up
+  when: "'Logged out.' in tailscale_status.stdout"
+  block:
+    - name: Run with auth-key
+      when: tailscale_auth_key is defined
+      ansible.builtin.command:
+        cmd: tailscale up --auth-key "{{ tailscale_auth_key }}" --hostname "{{ inventory_hostname }}"  --login-server "{{ headscale_login_server }}"
+    - name: Run interactive login
+      when: tailscale_auth_key is not defined
+      ansible.builtin.command:
+        cmd: tailscale up --hostname "{{ inventory_hostname }}"  --login-server "{{ headscale_login_server }}"

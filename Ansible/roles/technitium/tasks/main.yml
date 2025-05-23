@@ -1,0 +1,44 @@
+---
+- name: Install ASP.NET
+  ansible.builtin.apt:
+    name:
+      - aspnetcore-runtime-8.0
+    update_cache: true
+    state: present
+
+- name: Create folders
+  ansible.builtin.file:
+    path: /opt/technitium/dns
+    state: directory
+    owner: "{{ server_admin_user }}"
+    group: "{{ server_admin_user }}"
+    mode: '0755'
+
+- name: Download Technitium DNS Server
+  ansible.builtin.get_url:
+    url: https://download.technitium.com/dns/DnsServerPortable.tar.gz
+    dest: /home/{{ server_admin_user }}/DnsServerPortable.tar.gz
+    mode: '0644'
+    force: no
+
+- name: Extract Technitium DNS Server
+  ansible.builtin.unarchive:
+    src: /home/{{ server_admin_user }}/DnsServerPortable.tar.gz
+    dest: /opt/technitium/dns
+    remote_src: yes
+
+- name: Copy systemd service file
+  ansible.builtin.copy:
+    src: /opt/technitium/dns/systemd.service
+    dest: /etc/systemd/system/dns.service
+    owner: root
+    group: root
+    mode: '0644'
+    remote_src: yes
+
+- name: Enable and start Technitium DNS Server service
+  ansible.builtin.systemd:
+    name: dns
+    enabled: yes
+    state: started
+
