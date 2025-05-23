@@ -2,7 +2,7 @@
 # LCARS02 ansible_host=192.168.1.140
 
 [utility]
-V-I-N-CENT ansible_host=192.168.2.116
+V-I-N-CENT ansible_host=100.64.0.6 ansible_port=2859
 # ICARUS ansible_host=192.168.1.20
 # GLaDOS ansible_host=192.168.1.159
 # GLaDOS ansible_host=100.81.166.3

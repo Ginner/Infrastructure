@@ -1,44 +1,269 @@
 ---
-- name: Install ASP.NET
-  ansible.builtin.apt:
-    name:
-      - aspnetcore-runtime-8.0
-    update_cache: true
-    state: present
-
-- name: Create folders
-  ansible.builtin.file:
+- name: Check if Technitium DNS Server is installed
+  stat:
     path: /opt/technitium/dns
-    state: directory
-    owner: "{{ server_admin_user }}"
-    group: "{{ server_admin_user }}"
-    mode: '0755'
+  register: technitium_installed
 
-- name: Download Technitium DNS Server
-  ansible.builtin.get_url:
-    url: https://download.technitium.com/dns/DnsServerPortable.tar.gz
-    dest: /home/{{ server_admin_user }}/DnsServerPortable.tar.gz
-    mode: '0644'
-    force: no
-
-- name: Extract Technitium DNS Server
-  ansible.builtin.unarchive:
-    src: /home/{{ server_admin_user }}/DnsServerPortable.tar.gz
-    dest: /opt/technitium/dns
-    remote_src: yes
-
-- name: Copy systemd service file
-  ansible.builtin.copy:
-    src: /opt/technitium/dns/systemd.service
-    dest: /etc/systemd/system/dns.service
-    owner: root
-    group: root
-    mode: '0644'
-    remote_src: yes
-
-- name: Enable and start Technitium DNS Server service
-  ansible.builtin.systemd:
+- name: Check if DNS service exists
+  systemd:
     name: dns
-    enabled: yes
-    state: started
+  register: dns_service_status
+  failed_when: false
 
+- name: Set installation status
+  set_fact:
+    is_technitium_installed: "{{ technitium_installed.stat.exists and dns_service_status.status is defined }}"
+
+- name: Display installation status
+  debug:
+    msg: "Technitium DNS Server installed: {{ is_technitium_installed }}"
+
+- name: Check for available updates
+  uri:
+    url: "http://{{ dns_server_host | default('localhost') }}:5380/api/user/checkForUpdate"
+    method: GET
+    url_username: "{{ dns_api_token }}"
+    return_content: yes
+    status_code: 200
+    timeout: 30
+  register: update_check_result
+  when: is_technitium_installed | bool
+  failed_when: false
+  tags:
+    - update_check
+
+- name: Parse update check response
+  set_fact:
+    update_info: "{{ update_check_result.content | from_json }}"
+  when:
+    - is_technitium_installed | bool
+    - update_check_result is defined
+    - update_check_result.status == 200
+  tags:
+    - update_check
+
+- name: Display current version information
+  debug:
+    msg: |
+      Current Version: {{ update_info.response.currentVersion }}
+      Update Available: {{ update_info.response.updateAvailable }}
+      {% if update_info.response.updateAvailable %}
+      Latest Version: {{ update_info.response.updateVersion }}
+      Update Title: {{ update_info.response.updateTitle | default('N/A') }}
+      {% endif %}
+  when:
+    - update_info is defined
+    - update_info.status == "ok"
+  tags:
+    - update_check
+
+- name: Set update variables
+  set_fact:
+    update_available: "{{ update_info.response.updateAvailable | default(false) }}"
+    current_version: "{{ update_info.response.currentVersion | default('unknown') }}"
+    update_version: "{{ update_info.response.updateVersion | default('unknown') }}"
+    needs_installation: "{{ not is_technitium_installed }}"
+    needs_update: "{{ is_technitium_installed and (update_info.response.updateAvailable | default(false)) }}"
+  when: update_info is defined or not is_technitium_installed
+
+- name: Set installation flag when not installed
+  set_fact:
+    needs_installation: true
+    needs_update: false
+  when: not is_technitium_installed
+
+- name: Install Technitium DNS Server (if not installed)
+  block:
+    - name: Install ASP.NET
+      ansible.builtin.apt:
+        name:
+          - aspnetcore-runtime-8.0
+        update_cache: true
+        state: present
+
+    - name: Create folders
+      ansible.builtin.file:
+        path: /opt/technitium/dns
+        state: directory
+        owner: "{{ server_admin_user }}"
+        group: "{{ server_admin_user }}"
+        mode: '0755'
+
+    - name: Download Technitium DNS Server
+      ansible.builtin.get_url:
+        url: https://download.technitium.com/dns/DnsServerPortable.tar.gz
+        dest: /home/{{ server_admin_user }}/DnsServerPortable.tar.gz
+        mode: '0644'
+        force: no
+
+    - name: Extract Technitium DNS Server
+      ansible.builtin.unarchive:
+        src: /home/{{ server_admin_user }}/DnsServerPortable.tar.gz
+        dest: /opt/technitium/dns
+        remote_src: yes
+
+    - name: Copy systemd service file
+      ansible.builtin.copy:
+        src: /opt/technitium/dns/systemd.service
+        dest: /etc/systemd/system/dns.service
+        owner: root
+        group: root
+        mode: '0644'
+        remote_src: yes
+
+    - name: Enable and start Technitium DNS Server service
+      ansible.builtin.systemd:
+        name: dns
+        enabled: yes
+        state: started
+        daemon_reload: yes
+
+    - name: Display installation completion
+      debug:
+        msg: "Technitium DNS Server has been successfully installed and started."
+
+  when: needs_installation | default(false)
+  tags:
+    - install
+
+- name: Update Technitium DNS Server
+  block:
+    - name: Display update information
+      debug:
+        msg: |
+          Updating Technitium DNS Server
+          From version: {{ current_version }}
+          To version: {{ update_version }}
+
+    - name: Download latest Technitium DNS Server
+      ansible.builtin.get_url:
+        url: https://download.technitium.com/dns/DnsServerPortable.tar.gz
+        dest: /home/{{ server_admin_user }}/DnsServerPortable.tar.gz
+        mode: '0644'
+        force: yes
+      register: download_result
+
+    - name: Stop DNS service before update
+      ansible.builtin.systemd:
+        name: dns
+        state: stopped
+
+    - name: Create backup of current installation
+      ansible.builtin.copy:
+        src: /opt/technitium/dns/
+        dest: /opt/technitium/dns-backup-{{ ansible_date_time.epoch }}/
+        remote_src: yes
+        backup: yes
+      register: backup_result
+
+    - name: Extract updated Technitium DNS Server
+      ansible.builtin.unarchive:
+        src: /home/{{ server_admin_user }}/DnsServerPortable.tar.gz
+        dest: /opt/technitium/dns
+        remote_src: yes
+        owner: "{{ server_admin_user }}"
+        group: "{{ server_admin_user }}"
+
+    - name: Update systemd service file if needed
+      ansible.builtin.copy:
+        src: /opt/technitium/dns/systemd.service
+        dest: /etc/systemd/system/dns.service
+        owner: root
+        group: root
+        mode: '0644'
+        remote_src: yes
+      register: service_file_updated
+
+    - name: Reload systemd daemon if service file was updated
+      ansible.builtin.systemd:
+        daemon_reload: yes
+      when: service_file_updated.changed
+
+    - name: Start DNS service after update
+      ansible.builtin.systemd:
+        name: dns
+        state: started
+        enabled: yes
+
+    - name: Wait for service to be fully started
+      wait_for:
+        port: 5380
+        host: localhost
+        delay: 5
+        timeout: 30
+
+    - name: Verify update was successful
+      uri:
+        url: "http://localhost:5380/api/user/checkForUpdate"
+        method: GET
+        url_username: "{{ dns_api_token }}"
+        return_content: yes
+        status_code: 200
+        timeout: 30
+      register: post_update_check
+      retries: 3
+      delay: 5
+
+    - name: Display post-update status
+      debug:
+        msg: |
+          Update completed successfully!
+          Current Version: {{ (post_update_check.content | from_json).response.currentVersion }}
+          Update Available: {{ (post_update_check.content | from_json).response.updateAvailable }}
+          Backup created at: {{ backup_result.dest }}
+      when:
+        - post_update_check.status == 200
+
+  rescue:
+    - name: Handle update failure
+      debug:
+        msg: |
+          Update failed! Attempting to restore from backup.
+          Backup location: {{ backup_result.dest | default('No backup created') }}
+
+    - name: Stop service for rollback
+      ansible.builtin.systemd:
+        name: dns
+        state: stopped
+      when: backup_result is defined
+
+    - name: Restore from backup on failure
+      ansible.builtin.copy:
+        src: "{{ backup_result.dest }}"
+        dest: /opt/technitium/dns/
+        remote_src: yes
+      when: backup_result is defined
+
+    - name: Start service after rollback
+      ansible.builtin.systemd:
+        name: dns
+        state: started
+      when: backup_result is defined
+
+    - name: Fail the playbook after rollback
+      fail:
+        msg: "Update failed and system was rolled back to previous version"
+
+  when: needs_update | default(false)
+  tags:
+    - update
+
+- name: Clean up downloaded files
+  ansible.builtin.file:
+    path: /home/{{ server_admin_user }}/DnsServerPortable.tar.gz
+    state: absent
+  tags:
+    - cleanup
+
+- name: Display final status
+  debug:
+    msg: |
+      {% if needs_installation | default(false) %}
+      Technitium DNS Server has been installed successfully.
+      {% elif needs_update | default(false) %}
+      Technitium DNS Server has been updated successfully.
+      {% else %}
+      Technitium DNS Server is already up to date.
+      {% endif %}
+  tags:
+    - always
