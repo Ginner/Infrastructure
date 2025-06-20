@@ -44,6 +44,11 @@
 
   # Enable flakes
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
+  nix.gc = {
+    automatic = true;
+    dates = "weekly";
+    options = "--delete-older-than 30d";
+  };
 
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
