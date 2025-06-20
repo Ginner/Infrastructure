@@ -8,4 +8,5 @@ in
 {
   "ghcr-token.age".publicKeys = [ ginner GLaDOS ];
   "namecheap-api.age".publicKeys = [ ginner GLaDOS ];
+  "traccar.age".publicKeys = [ ginner GLaDOS ];
 }

@@ -59,6 +59,7 @@
   age.secrets = {
     ghcr-token.file = ./.secrets/ghcr-token.age;
     namecheap-api.file = ./.secrets/namecheap-api.age;
+    traccar.file = ./.secrets/traccar.age;
   };
 
   environment.systemPackages = with pkgs; [

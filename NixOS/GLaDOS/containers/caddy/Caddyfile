@@ -32,4 +32,7 @@
     @forgejo host forgejo.ginnerskov.co
     reverse_proxy @forgejo forgejo:3000
 
+    @traccar host traccar.ginnerskov.co
+    reverse_proxy @traccar traccar:8082
+
 }

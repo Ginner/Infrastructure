@@ -7,9 +7,11 @@
       80      # Allow HTTP and HTTPS
       222     # SSH for forgejo
       443
-      29811   # For omada controller
+      5013    # For GPS Tracker
       8088
       8043
+      8082    # For Traccar web interface
+      29811   # For omada controller
       29812
       29813
       29814
@@ -71,6 +73,8 @@
         baikal = import ./containers/baikal.nix;
         jupyter = import ./containers/jupyter.nix;
         forgejo = import ./containers/forgejo.nix;
+        traccar-db = import ./containers/traccar-db.nix {inherit config; };
+        traccar = import ./containers/traccar.nix {inherit config; };
       };
     };
   };
