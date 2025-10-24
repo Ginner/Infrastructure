@@ -1,0 +1,22 @@
+---
+- name: Enable UFW
+  community.general.ufw:
+    state: enabled
+
+- name: Make sure I can still SSH into the server
+  community.general.ufw:
+    rule: allow
+    port: '22'
+    proto: tcp
+
+- name: Make sure traffic is allowed on the http port
+  community.general.ufw:
+    rule: allow
+    port: '80'
+    proto: tcp
+
+- name: Make sure traffic is allowed on the https port
+  community.general.ufw:
+    rule: allow
+    port: '443'
+    proto: tcp
