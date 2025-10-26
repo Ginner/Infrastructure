@@ -1,0 +1,3 @@
+---
+ansible_host: "{{ website_ip }}"
+ansible_user: "{{ server_admin_user }}"

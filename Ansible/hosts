@@ -8,6 +8,9 @@ V-I-N-CENT ansible_host=100.64.0.6 ansible_port=2859
 # GLaDOS ansible_host=100.81.166.3
 # GLaDOS ansible_host=glados.netbird.cloud
 
+[grif]
+# grif-website ansible_host=46.224.12.80 ansible_user=root
+grif-website
 # [desktops]
 #
 # [laptops]

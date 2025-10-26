@@ -1,0 +1,69 @@
+---
+- hosts: grif-website
+  gather_facts: true
+  become: true
+  roles:
+    - { role: ubuntu_setup, tags: ['setup'] }
+    - { role: ubuntu_maintenance, tags: ['setup'] }
+    - { role: docker, tags: ['setup'] }
+    - { role: web_server, tags: ['setup'] }
+
+  vars:
+    project_dir: "/opt/grif-website"
+
+  tasks:
+    - name: Make sure project folders exists
+      ansible.builtin.file:
+        path: "{{ project_dir }}"
+        state: directory
+        owner: "{{ server_admin_user }}"
+        group: "{{ server_admin_user }}"
+        recurse: yes
+        mode: "0755"
+
+    - name: Clone the github repo
+      ansible.builtin.git:
+        repo: "https://{{ github_pat }}@github.com/{{ github_user }}/{{ github_repo }}.git"
+        dest: "{{ project_dir }}"
+        version: "{{ git_branch | default('main') }}"  # Change to 'prod' when applicable
+        update: true
+        force: true
+
+
+    - name: Copy over configuration and docker files files
+      ansible.builtin.copy:
+        src: "files/grif-website/"
+        dest: "{{ project_dir }}/"
+        owner: "{{ server_admin_user }}"
+        group: "{{ server_admin_user }}"
+        mode: "0644"
+      # loop:
+      #   - files/grif-website/Caddyfile-internal
+      #   - files/grif-website/Dockerfile
+      #   - files/grif-website/docker-compose.yml
+
+    - name: Write the front-facing Caddyfile
+      template:
+        src: "templates/grif-website/Caddyfile.j2"
+        dest: "{{ project_dir }}/Caddyfile"
+
+    - name: Build and deploy
+      community.docker.docker_compose_v2:
+        project_src: "{{ project_dir }}"
+        state: present
+        pull: always
+        build: always
+        recreate: always
+        remove_orphans: true
+
+    # - name: Recreate containers
+    #   community.docker.docker_compose_v2:
+    #     project_src: "{{ project_dir }}"
+    #     recreate: always
+    #     state: present
+
+    - name: Remove dangling Docker images
+      community.docker.docker_prune:
+        images: true
+        networks: true
+        builder_cache: true

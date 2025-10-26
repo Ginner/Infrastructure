@@ -1,0 +1,32 @@
+services:
+  app:
+    build:
+      context: .
+    container_name: astro_app
+    restart: unless-stopped
+    networks: [web]
+    expose:
+      - 8080
+
+  caddy:
+    image: caddy:2.8-alpine
+    container_name: caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - caddy_data:/data
+      - caddy_config:/config
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+    depends_on:
+      - app
+    networks: [web]
+
+networks:
+  web:
+
+volumes:
+  caddy_data:
+  caddy_config:
+
