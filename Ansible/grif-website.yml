@@ -18,7 +18,6 @@
         state: directory
         owner: "{{ server_admin_user }}"
         group: "{{ server_admin_user }}"
-        recurse: yes
         mode: "0755"
 
     - name: Clone the github repo
