@@ -1,0 +1,34 @@
+services:
+  plausible:
+    image: plausible/analytics:latest
+    depends_on:
+      - plausible_db
+      - plausible_events_db
+    env_file:
+      - ./plausible.env
+    # expose only to localhost; Caddy will proxy to this
+    ports:
+      - "127.0.0.1:8000:${HTTP_PORT:-8000}"
+    restart: unless-stopped
+
+  plausible_db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-plausible_db}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set-in-env}
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  plausible_events_db:
+    image: clickhouse/clickhouse-server:latest
+    ulimits:
+      nofile:
+        soft: 262144
+        hard: 262144
+    environment:
+      - CLICKHOUSE_DB=${CLICKHOUSE_DB:-plausible_events_db}
+    volumes:
+      - ./data/clickhouse:/var/lib/clickhouse
+    restart: unless-stopped
