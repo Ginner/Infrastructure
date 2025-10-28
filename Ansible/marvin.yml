@@ -9,88 +9,59 @@
     - { role: web_server, tags: ['setup'] }
 
   tasks:
+    - name: Make sure project folders exists
+      ansible.builtin.file:
+        path: "{{ projects_dir }}/{{ item }}"
+        state: directory
+        owner: "{{ server_admin_user }}"
+        group: "{{ server_admin_user }}"
+        mode: "0755"
+      loop:
+        - "{{ plausible_project_dir }}"
+
     - name: Ensure secrets folder exists
       become: true
       ansible.builtin.file:
         path: "/run/secrets/{{ item }}"
         state: directory
         mode: "0750"
-      loop: "{{ project_dirs}}"
+      loop:
+        - "{{ plausible_project_dir }}"
 
-    - name: Write shared secrets files
+    - name: Write secrets files for plausible
       become: true
       no_log: true
       ansible.builtin.copy:
         content: "{{ item.value }}"
-        dest: "/run/secrets/{{ item.dir }}/{{ item.key }}"
+        dest: "/run/secrets/{{ plausible_project_dir }}/{{ item.key }}"
         mode: "0600"
-      loop: "{{ secret_shared_env_vars | dict2items }}"
+      loop: "{{ plausible_secret_variables | dict2items }}"
       loop_control:
         label: "{{ item }}"
 
-    - name: Create project directory
-      file:
-        path: "{{ project_dir }}"
-        state: directory
-        recurse: yes
-        mode: '0755'
-
-    - name: Make sure project folders exists
-      ansible.builtin.file:
-        path: "{{ item }}"
-        state: directory
-        owner: "{{ server_admin_user }}"
-        group: "{{ server_admin_user }}"
-        mode: "0755"
-      loop: "{{ project_dirs }}"
-
-
-
-
-
-    - name: Clone the github repo
-      ansible.builtin.git:
-        repo: "https://{{ github_pat }}@github.com/{{ github_user }}/{{ github_repo }}.git"
-        dest: "{{ project_dir }}"
-        version: "{{ git_branch | default('main') }}"  # Change to 'prod' when applicable
-        update: true
-        force: true
-
-
-    - name: Copy over configuration and docker files files
-      ansible.builtin.copy:
-        src: "files/grif-website/"
-        dest: "{{ project_dir }}/"
-        owner: "{{ server_admin_user }}"
-        group: "{{ server_admin_user }}"
-        mode: "0644"
-      # loop:
-      #   - files/grif-website/Caddyfile-internal
-      #   - files/grif-website/Dockerfile
-      #   - files/grif-website/docker-compose.yml
-
-    - name: Write the front-facing Caddyfile
+    - name: Write the Caddyfile
       template:
-        src: "templates/grif-website/Caddyfile.j2"
-        dest: "{{ project_dir }}/Caddyfile"
+        src: "templates/marvin/Caddyfile.j2"
+        dest: "{{ projects_dir }}/{{ plausible_project_dir }}/Caddyfile"
 
-    - name: Build and deploy
+    - name: Write the docker compose file
+      ansible.builtin.template:
+        src: "templates/marvin/docker-compose.yml.j2"
+        dest: "{{ projects_dir }}/{{ plausible_project_dir }}/docker-compose.yml"
+        mode: "0644"
+
+    - name: Build and deploy plausible
       community.docker.docker_compose_v2:
-        project_src: "{{ project_dir }}"
+        project_src: "{{ projects_dir }}/{{ plausible_project_dir }}"
         state: present
         pull: always
         build: always
         recreate: always
         remove_orphans: true
 
-    # - name: Recreate containers
-    #   community.docker.docker_compose_v2:
-    #     project_src: "{{ project_dir }}"
-    #     recreate: always
-    #     state: present
-
     - name: Remove dangling Docker images
       community.docker.docker_prune:
         images: true
         networks: true
         builder_cache: true
+

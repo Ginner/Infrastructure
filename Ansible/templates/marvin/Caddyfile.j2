@@ -1,12 +1,11 @@
 {{ plausible_domain }} {
     encode zstd gzip
-    reverse_proxy localhost:8000
+    reverse_proxy plausible:8000
+
     header {
         X-Content-Type-Options nosniff
         Referrer-Policy strict-origin-when-cross-origin
         X-Frame-Options DENY
         Permissions-Policy camera=(), microphone=(), geolocation=()
-        # If you run a CSP on your other sites, remember to allow:
-        #   connect-src https://analytics.your-domain.tld
     }
 }
