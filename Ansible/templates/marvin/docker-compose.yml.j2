@@ -2,12 +2,14 @@ services:
   plausible_db:
     image: postgres:16-alpine
     restart: always
+    networks:
+      - plausible
     volumes:
       - db-data:/var/lib/postgresql/data
-      - /run/secrets/plausible:/run/secrets:ro
+      - /run/secrets/{{ plausible_project_dir }}:/run/secrets:ro
     environment:
       POSTGRES_DB: plausible_db
-      POSTGRES_USER: postgres
+      POSTGRES_USER: plausible
       POSTGRES_PASSWORD_FILE: /run/secrets/POSTGRES_PASSWORD
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
@@ -17,6 +19,8 @@ services:
   plausible_events_db:
     image: clickhouse/clickhouse-server:24.12-alpine
     restart: always
+    networks:
+      - plausible
     volumes:
       - event-data:/var/lib/clickhouse
       - event-logs:/var/log/clickhouse-server
@@ -33,6 +37,8 @@ services:
   plausible:
     image: ghcr.io/plausible/community-edition:v3.0.1
     restart: always
+    networks:
+      - plausible
     command: sh -c "/entrypoint.sh db createdb && /entrypoint.sh db migrate && /entrypoint.sh run"
     depends_on:
       plausible_db:
@@ -41,18 +47,27 @@ services:
         condition: service_healthy
     volumes:
       - plausible-data:/var/lib/plausible
-      - /run/secrets/plausible:/run/secrets:ro
+      - /run/secrets/{{ plausible_project_dir }}:/run/secrets:ro
     ulimits:
       nofile:
         soft: 65535
         hard: 65535
     environment:
-      TMPDIR=/var/lib/plausible/tmp
+      CONFIG_DIR: /run/secrets
+      TMPDIR: /var/lib/plausible/tmp
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/api/system/health || exit 1"]
+      start_period: 2m
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   caddy:
     image: caddy:latest
     container_name: caddy
     restart: unless-stopped
+    networks:
+      - plausible
     ports:
       - "80:80"
       - "443:443"
@@ -62,6 +77,10 @@ services:
       - caddy_data:/data
       - caddy_config:/config
 
+networks:
+  plausible:
+    name: plausible
+    driver: bridge
 
 volumes:
   db-data:

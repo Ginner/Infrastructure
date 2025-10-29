@@ -1,5 +1,6 @@
 {{ plausible_domain }} {
     encode zstd gzip
+    tls {{ admin_email }}
     reverse_proxy plausible:8000
 
     header {
