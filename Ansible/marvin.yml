@@ -36,8 +36,6 @@
         dest: "/run/secrets/{{ plausible_project_dir }}/{{ item.key }}"
         mode: "0600"
       loop: "{{ plausible_secret_variables | dict2items }}"
-      loop_control:
-        label: "{{ item }}"
 
     - name: Write the Caddyfile
       template:
