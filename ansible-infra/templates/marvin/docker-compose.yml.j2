@@ -68,6 +68,7 @@ services:
     restart: unless-stopped
     networks:
       - plausible
+      - ntfy
     ports:
       - "80:80"
       - "443:443"
@@ -77,9 +78,33 @@ services:
       - caddy_data:/data
       - caddy_config:/config
 
+  ntfy:
+    image: binwiederhier/ntfy
+    container_name: ntfy
+    command:
+      - serve
+    environment:
+      - TZ={{ timezone }}
+    networks:
+      - ntfy
+    volumes:
+      - ntfy_cache:/var/cache/ntfy
+      - ./ntfy-server.yml:/etc/ntfy/server.yml:ro
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --tries=1 http://localhost:80/v1/health -O - | grep -Eo '\"healthy\"\\s*:\\s*true' || exit 1"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+    init: true
+
 networks:
   plausible:
     name: plausible
+    driver: bridge
+  ntfy:
+    name: ntfy
     driver: bridge
 
 volumes:
@@ -89,3 +114,4 @@ volumes:
   plausible-data:
   caddy_data:
   caddy_config:
+  ntfy_cache:

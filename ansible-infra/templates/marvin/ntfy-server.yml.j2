@@ -2,10 +2,14 @@
 # https://docs.ntfy.sh/config/
 
 # Public base URL
-base-url: http://localhost
+base-url: https://{{ ntfy_domain }}
 
 # Listen address for the HTTP & HTTPS web server
 listen-http: :80
+
+# Behind proxy configuration
+# Tell ntfy to use "X-Forwarded-For" header to identify visitors for rate limiting
+behind-proxy: true
 
 # Path to the cache file
 cache-file: /var/cache/ntfy/cache.db

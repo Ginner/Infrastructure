@@ -8,4 +8,4 @@ projects_dir: /opt
 plausible_project_dir: plausible
 ntfy_project_dir: ntfy
 
-timezone: UTC
+timezone: Europe/Copenhagen
