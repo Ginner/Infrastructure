@@ -6,3 +6,6 @@ ansible_user: "{{ server_admin_user }}"
 projects_dir: /opt
 
 plausible_project_dir: plausible
+ntfy_project_dir: ntfy
+
+timezone: UTC

@@ -18,6 +18,7 @@
         mode: "0755"
       loop:
         - "{{ plausible_project_dir }}"
+        - "{{ ntfy_project_dir }}"
 
     - name: Ensure secrets folder exists
       become: true
@@ -62,4 +63,33 @@
         images: true
         networks: true
         builder_cache: true
+
+    # ntfy tasks
+    - name: Create ntfy cache directory
+      ansible.builtin.file:
+        path: /var/cache/ntfy
+        state: directory
+        owner: "{{ server_admin_user }}"
+        group: "{{ server_admin_user }}"
+        mode: "0755"
+
+    - name: Write ntfy server configuration
+      ansible.builtin.template:
+        src: "templates/marvin/ntfy-server.yml.j2"
+        dest: "{{ projects_dir }}/{{ ntfy_project_dir }}/server.yml"
+        mode: "0644"
+
+    - name: Write ntfy docker-compose file
+      ansible.builtin.template:
+        src: "templates/marvin/ntfy-docker-compose.yml.j2"
+        dest: "{{ projects_dir }}/{{ ntfy_project_dir }}/docker-compose.yml"
+        mode: "0644"
+
+    - name: Build and deploy ntfy
+      community.docker.docker_compose_v2:
+        project_src: "{{ projects_dir }}/{{ ntfy_project_dir }}"
+        state: present
+        pull: always
+        recreate: always
+        remove_orphans: true
 
