@@ -1,0 +1,23 @@
+# ntfy server configuration
+# https://docs.ntfy.sh/config/
+
+# Public base URL
+base-url: http://localhost
+
+# Listen address for the HTTP & HTTPS web server
+listen-http: :80
+
+# Path to the cache file
+cache-file: /var/cache/ntfy/cache.db
+
+# If set, attachments will be stored in this directory
+attachment-cache-dir: /var/cache/ntfy/attachments
+
+# Cache duration for messages
+cache-duration: 12h
+
+# Keepalive interval
+keepalive-interval: 45s
+
+# Manager interval
+manager-interval: 1m
