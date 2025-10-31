@@ -32,3 +32,10 @@ auth-default-access: "deny-all"
 auth-users:
     - "{{ ntfy_admin }}:{{ ntfy_admin_pw_hash }}:admin"
     - "{{ ntfy_user }}:{{ ntfy_user_pw_hash }}:user"
+    - "{{ ntfy_homeassistant }}:{{ ntfy_homeassistant_pw_hash }}:user"
+auth-access:
+    - "{{ ntfy_homeassistant }}:home-alerts:rw"
+    - "{{ ntfy_user}}:home-alerts:ro"
+    - "{{ ntfy_user}}:alerts-*:ro"
+auth-tokens:
+    - "{{ ntfy_homeassistant }}:{{ ntfy_homeassistant_token }}:homeassistant"
