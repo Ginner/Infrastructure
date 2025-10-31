@@ -25,3 +25,10 @@ keepalive-interval: 45s
 
 # Manager interval
 manager-interval: 1m
+
+# Access control
+auth-file: /var/lib/ntfy/user.db
+auth-default-access: "deny-all"
+auth-users:
+    - "{{ ntfy_admin }}:{{ ntfy_admin_pw_hash }}:admin"
+    - "{{ ntfy_user }}:{{ ntfy_user_pw_hash }}:user"

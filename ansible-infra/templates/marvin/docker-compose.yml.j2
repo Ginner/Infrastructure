@@ -90,6 +90,7 @@ services:
     volumes:
       - ntfy_cache:/var/cache/ntfy
       - ./ntfy-server.yml:/etc/ntfy/server.yml:ro
+      - ntfy_users:/var/lib/ntfy
     healthcheck:
       test: ["CMD-SHELL", "wget -q --tries=1 http://localhost:80/v1/health -O - | grep -Eo '\"healthy\"\\s*:\\s*true' || exit 1"]
       interval: 60s
@@ -115,3 +116,4 @@ volumes:
   caddy_data:
   caddy_config:
   ntfy_cache:
+  ntfy_users:
