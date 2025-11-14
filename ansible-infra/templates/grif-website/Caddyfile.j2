@@ -4,7 +4,7 @@
     admin off
 }
 
-http://{{ site_urls | join(', ') }} {
+http://{{ site_urls | join(', http://') }} {
     redir https://{host}{uri} permanent
 }
 
