@@ -21,6 +21,8 @@
         - "{{ plausible_project_dir }}"
         - "{{ ntfy_project_dir }}"
         - "{{ radicale_project_dir }}"
+        - "{{ radicale_project_dir }}/config"
+        - "{{ radicale_project_dir }}/data"
 
     - name: Ensure secrets folder exists
       become: true
@@ -55,13 +57,13 @@
     - name: Write radicale users file
       ansible.builtin.template:
         src: "templates/marvin/radicale-users.j2"
-        dest: "{{ projects_dir }}/{{ radicale_project_dir }}/users"
+        dest: "{{ projects_dir }}/{{ radicale_project_dir }}/config/users"
         mode: "0644"
 
     - name: Copy radicale configuration file
       ansible.builtin.copy:
         src: "files/marvin/radicale.conf"
-        dest: "{{ projects_dir }}/{{ radicale_project_dir }}/radicale.conf"
+        dest: "{{ projects_dir }}/{{ radicale_project_dir }}/config/config"
         mode: "0644"
 
     - name: Write the docker compose file

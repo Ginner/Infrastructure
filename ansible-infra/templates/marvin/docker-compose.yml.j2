@@ -89,7 +89,7 @@ services:
     container_name: radicale
     restart: unless-stopped
     volumes:
-      - ./{{ radicale_project_dir }}:/etc/radicale/config:ro
+      - ./{{ radicale_project_dir }}/config:/etc/radicale:ro
       - ./{{ radicale_project_dir }}/data:/var/lib/radicale
     networks:
       - dav-net
