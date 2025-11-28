@@ -35,7 +35,7 @@ services:
       start_period: 1m
 
   plausible:
-    image: ghcr.io/plausible/community-edition:v3.0.1
+    image: ghcr.io/plausible/community-edition:v3
     restart: always
     networks:
       - plausible
@@ -62,6 +62,38 @@ services:
       timeout: 10s
       retries: 3
 
+  ntfy:
+    image: binwiederhier/ntfy
+    container_name: ntfy
+    command:
+      - serve
+    environment:
+      - TZ={{ timezone }}
+    networks:
+      - ntfy
+    volumes:
+      - ntfy_cache:/var/cache/ntfy
+      - ./{{ ntfy_project_dir }}/ntfy-server.yml:/etc/ntfy/server.yml:ro
+      - ntfy_users:/var/lib/ntfy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --tries=1 http://localhost:80/v1/health -O - | grep -Eo '\"healthy\"\\s*:\\s*true' || exit 1"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+    init: true
+
+  radicale:
+    image: grepular/radicale:3
+    container_name: radicale
+    restart: unless-stopped
+    volumes:
+      - ./{{ radicale_project_dir }}:/etc/radicale/config:ro
+      - ./{{ radicale_project_dir }}/data:/var/lib/radicale
+    networks:
+      - dav-net
+
   caddy:
     image: caddy:latest
     container_name: caddy
@@ -78,39 +110,6 @@ services:
       - ./Caddyfile:/etc/caddy/Caddyfile
       - caddy_data:/data
       - caddy_config:/config
-
-  ntfy:
-    image: binwiederhier/ntfy
-    container_name: ntfy
-    command:
-      - serve
-    environment:
-      - TZ={{ timezone }}
-    networks:
-      - ntfy
-    volumes:
-      - ntfy_cache:/var/cache/ntfy
-      - ./ntfy-server.yml:/etc/ntfy/server.yml:ro
-      - ntfy_users:/var/lib/ntfy
-    healthcheck:
-      test: ["CMD-SHELL", "wget -q --tries=1 http://localhost:80/v1/health -O - | grep -Eo '\"healthy\"\\s*:\\s*true' || exit 1"]
-      interval: 60s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
-    restart: unless-stopped
-    init: true
-
-  radicale:
-    image: grepular/radicale:3
-    container_name: radicale
-    restart: unless-stopped
-    volumes:
-      - ./radicale/radicale.conf:/etc/radicale/config:ro
-      - ./radicale/users:/etc/radicale/users:ro
-      - ./radicale/collections:/var/lib/radicale/collections
-    networks:
-      - dav-net
 
 networks:
   plausible:

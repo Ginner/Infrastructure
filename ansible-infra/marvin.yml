@@ -16,8 +16,10 @@
         owner: "{{ server_admin_user }}"
         group: "{{ server_admin_user }}"
         mode: "0755"
+        recurse: true
       loop:
         - "{{ plausible_project_dir }}"
+        - "{{ ntfy_project_dir }}"
         - "{{ radicale_project_dir }}"
 
     - name: Ensure secrets folder exists
@@ -42,12 +44,12 @@
     - name: Write the Caddyfile
       template:
         src: "templates/marvin/Caddyfile.j2"
-        dest: "{{ projects_dir }}/{{ plausible_project_dir }}/Caddyfile"
+        dest: "{{ projects_dir }}/Caddyfile"
 
     - name: Write ntfy server configuration
       ansible.builtin.template:
         src: "templates/marvin/ntfy-server.yml.j2"
-        dest: "{{ projects_dir }}/{{ plausible_project_dir }}/ntfy-server.yml"
+        dest: "{{ projects_dir }}/{{ ntfy_project_dir }}/ntfy-server.yml"
         mode: "0644"
 
     - name: Write radicale users file
@@ -65,12 +67,12 @@
     - name: Write the docker compose file
       ansible.builtin.template:
         src: "templates/marvin/docker-compose.yml.j2"
-        dest: "{{ projects_dir }}/{{ plausible_project_dir }}/docker-compose.yml"
+        dest: "{{ projects_dir }}/docker-compose.yml"
         mode: "0644"
 
-    - name: Build and deploy plausible
+    - name: Build and deploy the stack
       community.docker.docker_compose_v2:
-        project_src: "{{ projects_dir }}/{{ plausible_project_dir }}"
+        project_src: "{{ projects_dir }}"
         state: present
         pull: always
         build: always
