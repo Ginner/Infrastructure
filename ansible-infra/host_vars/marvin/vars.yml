@@ -7,5 +7,6 @@ projects_dir: /opt
 
 plausible_project_dir: plausible
 ntfy_project_dir: ntfy
+radicale_project_dir: radicale
 
 timezone: Europe/Copenhagen

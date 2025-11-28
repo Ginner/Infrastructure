@@ -69,6 +69,7 @@ services:
     networks:
       - plausible
       - ntfy
+      - dav-net
     ports:
       - "80:80"
       - "443:443"
@@ -100,12 +101,26 @@ services:
     restart: unless-stopped
     init: true
 
+  radicale:
+    image: grepular/radicale:3
+    container_name: radicale
+    restart: unless-stopped
+    volumes:
+      - ./radicale/radicale.conf:/etc/radicale/config:ro
+      - ./radicale/users:/etc/radicale/users:ro
+      - ./radicale/collections:/var/lib/radicale/collections
+    networks:
+      - dav-net
+
 networks:
   plausible:
     name: plausible
     driver: bridge
   ntfy:
     name: ntfy
+    driver: bridge
+  dav-net:
+    name: dav-net
     driver: bridge
 
 volumes:

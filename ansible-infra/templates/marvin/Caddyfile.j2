@@ -25,3 +25,12 @@
     }
     redir @httpget https://{host}{uri}
 }
+
+{{ radicale_domain }} {
+    encode zstd gzip
+    reverse_proxy radicale:5232
+    header {
+        header_up X-Forwarded-Proto {scheme}
+        header_up X-Forwarded-Host {host}
+    }
+}
