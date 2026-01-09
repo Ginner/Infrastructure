@@ -45,21 +45,17 @@
         mode: "0600"
       loop: "{{ plausible_secret_variables | dict2items }}"
 
-    - name: Copy ClickHouse logger config
+    - name: Copy ClickHouse config fragments
       ansible.builtin.copy:
-        src: "files/marvin/clickhouse/logger.xml"
-        dest: "{{ projects_dir }}/{{ plausible_project_dir }}/clickhouse/config.d/logger.xml"
+        src: "files/marvin/clickhouse/config.d/{{ item }}"
+        dest: "{{ projects_dir }}/{{ plausible_project_dir }}/clickhouse/config.d/{{ item }}"
         owner: "{{ server_admin_user }}"
         group: "{{ server_admin_user }}"
         mode: "0644"
-
-    - name: Copy ClickHouse system logs TTL config
-      ansible.builtin.copy:
-        src: "files/marvin/clickhouse/system_logs_ttl.xml"
-        dest: "{{ projects_dir }}/{{ plausible_project_dir }}/clickhouse/config.d/system_logs_ttl.xml"
-        owner: "{{ server_admin_user }}"
-        group: "{{ server_admin_user }}"
-        mode: "0644"
+      loop:
+        - logger.xml
+        - system_logs_ttl.xml
+        # - 10-network.xml  # Seems to work fine w.o. as long as I'm not overwriting the defaults.
 
     - name: One-time cleanup of ClickHouse system log tables
       tags: ['clickhouse_cleanup']
