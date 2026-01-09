@@ -19,6 +19,8 @@
         recurse: true
       loop:
         - "{{ plausible_project_dir }}"
+        - "{{ plausible_project_dir }}/clickhouse"
+        - "{{ plausible_project_dir }}/clickhouse/config.d"
         - "{{ ntfy_project_dir }}"
         - "{{ radicale_project_dir }}"
         - "{{ radicale_project_dir }}/config"
@@ -42,6 +44,38 @@
         owner: 999
         mode: "0600"
       loop: "{{ plausible_secret_variables | dict2items }}"
+
+    - name: Copy ClickHouse logger config
+      ansible.builtin.copy:
+        src: "files/marvin/clickhouse/logger.xml"
+        dest: "{{ projects_dir }}/{{ plausible_project_dir }}/clickhouse/config.d/logger.xml"
+        owner: "{{ server_admin_user }}"
+        group: "{{ server_admin_user }}"
+        mode: "0644"
+
+    - name: Copy ClickHouse system logs TTL config
+      ansible.builtin.copy:
+        src: "files/marvin/clickhouse/system_logs_ttl.xml"
+        dest: "{{ projects_dir }}/{{ plausible_project_dir }}/clickhouse/config.d/system_logs_ttl.xml"
+        owner: "{{ server_admin_user }}"
+        group: "{{ server_admin_user }}"
+        mode: "0644"
+
+    - name: One-time cleanup of ClickHouse system log tables
+      tags: ['clickhouse_cleanup']
+      when: "'clickhouse_cleanup' in ansible_run_tags"
+      community.docker.docker_container_exec:
+        container: opt-plausible_events_db-1
+        command: >
+          clickhouse-client -q "
+          SYSTEM FLUSH LOGS;
+          TRUNCATE TABLE system.text_log;
+          TRUNCATE TABLE system.metric_log;
+          TRUNCATE TABLE system.asynchronous_metric_log;
+          TRUNCATE TABLE system.trace_log;
+          TRUNCATE TABLE system.query_log;
+          TRUNCATE TABLE system.processors_profile_log;
+          TRUNCATE TABLE system.error_log;"
 
     - name: Write the Caddyfile
       template:

@@ -15,7 +15,6 @@ services:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       start_period: 1m
 
-
   plausible_events_db:
     image: clickhouse/clickhouse-server:24.12-alpine
     restart: always
@@ -24,6 +23,7 @@ services:
     volumes:
       - event-data:/var/lib/clickhouse
       - event-logs:/var/log/clickhouse-server
+      - ./{{ plausible_project_dir }}/clickhouse/config.d:/etc/clickhouse-server/config.d:ro
     ulimits:
       nofile:
         soft: 262144

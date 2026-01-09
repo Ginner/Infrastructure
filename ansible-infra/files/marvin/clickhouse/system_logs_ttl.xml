@@ -1,0 +1,31 @@
+<clickhouse>
+  <!-- Keep 3 days of ClickHouse system logs -->
+  <text_log>
+    <ttl>event_date + INTERVAL 3 DAY</ttl>
+  </text_log>
+
+  <metric_log>
+    <ttl>event_date + INTERVAL 3 DAY</ttl>
+  </metric_log>
+
+  <asynchronous_metric_log>
+    <ttl>event_date + INTERVAL 3 DAY</ttl>
+  </asynchronous_metric_log>
+
+  <trace_log>
+    <ttl>event_date + INTERVAL 3 DAY</ttl>
+  </trace_log>
+
+  <query_log>
+    <ttl>event_date + INTERVAL 3 DAY</ttl>
+  </query_log>
+
+  <processors_profile_log>
+    <ttl>event_date + INTERVAL 3 DAY</ttl>
+  </processors_profile_log>
+
+  <error_log>
+    <ttl>event_date + INTERVAL 3 DAY</ttl>
+  </error_log>
+</clickhouse>
+
